@@ -1,0 +1,18 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="he">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="{% static 'Sledgepong/css/singles.css' %}">
+    <title>Sledgepong - Singles</title>
+</head>
+<body>
+    <canvas id="gameCanvas" width="800" height="600"></canvas>
+
+    <!-- Back button -->
+    <a class="back-button" href="{% url 'playpage' %}">Back</a>
+
+    <script src="{% static 'Sledgepong/js/singles.js' %}"></script> <!-- Include game script -->
+</body>
+</html>

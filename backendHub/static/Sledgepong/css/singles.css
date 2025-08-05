@@ -1,0 +1,35 @@
+/* General body styling */
+body {
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: #1c1f4a; /* Dark bluish background */
+    position: relative; /* Required for positioning the back button within the body */
+}
+
+/* Game canvas */
+#gameCanvas {
+    background-color: black;
+    border: 3px solid white;
+}
+
+/* Style for the back button */
+.back-button {
+    position: absolute;
+    top: 10px; /* 10px from the top of the screen */
+    left: 10px; /* 10px from the left edge of the screen */
+    padding: 10px 20px;
+    background-color: #ff5555; /* Red background for visibility */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    z-index: 10; /* Ensure the button stays above the canvas */
+}
+
+.back-button:hover {
+    background-color: #ff2222; /* Darker red on hover */
+}

@@ -1,0 +1,48 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DaEagleHub</title>
+    <link rel="stylesheet" href="{% static 'css/DaHub.css' %}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Jersey+15&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="header">
+      <div class="buttons">
+        {% if user.is_authenticated %}
+          <a href="{% url 'profile_view' %}" class="profile-image ">
+        <div class="profile-username">
+              <span class="username">{{ user.username }}</span>
+              <img src="{% static 'Images/profilepic.png' %}">
+        </div>
+              </a>
+        {% else %}
+        <a href="{% url 'user_login' %}" class="login-button">Sign In</a>
+        <a href="{% url 'signup' %}" class="signup-button">Sign Up</a>
+        {% endif %}
+      </div>
+
+        <img src="{% static 'logo/logo.png' %}" alt="Eagle Logo" id="logo_img">
+    </div>
+    <div class="container">
+        {% if user.is_authenticated %}
+            {% for app in apps %}
+                <div class="box">
+                   <a href="{% url app.name %}">
+                       <img src="{{ app.logo_img.url }}" alt="{{ app.name }} icon" class="app-icon">
+                   </a>
+                </div>
+            {% endfor %}
+
+        {% else %}
+            <div class="guest-info">
+                <p class="guest-text">Welcome, Guest! Please Log In Or Sign Up To Use DaEagleHub! Thank You For Your Cooperation</p>
+            </div>
+        {% endif %}
+    </div>
+</body>
+</html>

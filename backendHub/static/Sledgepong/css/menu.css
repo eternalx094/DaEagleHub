@@ -1,0 +1,85 @@
+/* backendHub/static/Sledgepong/css/menu.css */
+
+/* Body styling with outer glow */
+body {
+  background-color: #1c1f4a;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  font-family: 'Arial', sans-serif;
+  margin: 0;
+  /* Outer glow at screen edges */
+  box-shadow: 0 0 80px 40px rgba(70, 130, 180, 0.5) inset;
+  position: relative;
+}
+
+/* Back button fixed at top left */
+#backButton {
+  position: fixed;
+  top: 30px;
+  left: 30px;
+  background: #4a6c8f;
+  color: #fff;
+  padding: 15px 40px;
+  border-radius: 10px;
+  font-size: 20px;
+  text-decoration: none;
+  margin: 0;
+  box-shadow: 0 0 15px rgba(70, 130, 180, 0.8);
+  transition: background 0.2s, box-shadow 0.2s;
+  text-align: center;
+}
+#backButton:hover {
+  background: #35506b;
+}
+
+/* Modal container */
+.modal {
+  padding: 40px 60px;
+  border-radius: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+}
+
+/* Lobby section */
+.lobby {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+/* Main title */
+.main-title {
+  font-size: 80px;
+  color: #fefefe;
+  text-shadow: 0 0 20px rgba(70, 130, 180, 0.8);
+  margin-bottom: 30px;
+  transition: color 0.3s;
+}
+.main-title:hover {
+  color: #ADD8E6;
+  text-shadow: 0 0 30px rgba(70, 130, 180, 1);
+}
+
+/* Menu buttons */
+.btns {
+  display: block;
+  background: #4a6c8f;
+  color: #fff;
+  padding: 15px 40px;
+  border-radius: 10px;
+  font-size: 24px;
+  text-decoration: none;
+  margin: 5px 0;
+  box-shadow: 0 0 15px rgba(70, 130, 180, 0.8);
+  transition: background 0.2s, box-shadow 0.2s;
+  text-align: center;
+}
+.btns:hover {
+  background: #35506b;
+  box-shadow: 0 0 30px rgba(70, 130, 180, 1);
+}

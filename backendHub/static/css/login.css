@@ -1,0 +1,128 @@
+body {
+    background-color: #ffffff;
+    background-image: url("http://127.0.0.1:8000/media/DaHub/galaxy.jpg");
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center center;
+    color: #fff;
+    font-family: Arial, sans-serif;
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.login-container {
+    width: 100%;
+    max-width: 450px;
+    margin: 20px;
+    background: rgba(0, 0, 0, 0.25);
+    border-radius: 20px;
+    box-shadow: 0 0 40px rgba(70, 130, 180, 0.5);
+    padding: 40px 30px;
+    backdrop-filter: blur(5px);
+}
+
+.login-header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.login-logo {
+    width: 100px;
+    height: auto;
+    margin-bottom: 15px;
+}
+
+.login-title {
+    font-size: 2.2rem;
+    font-weight: bold;
+    margin: 0;
+    text-shadow: 0 0 10px #4a6c8f;
+    font-family: "Jersey 15", sans-serif;
+}
+
+.login-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.form-group label {
+    font-size: 1rem;
+    color: #ADD8E6;
+}
+
+.form-group input {
+    padding: 12px 15px;
+    border-radius: 8px;
+    border: 1px solid #4a6c8f;
+    background: rgba(0, 0, 0, 0.3);
+    color: white;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.form-group input:focus {
+    outline: none;
+    border-color: #ADD8E6;
+    box-shadow: 0 0 10px rgba(70, 130, 180, 0.8);
+}
+
+.login-button {
+    background: #4a6c8f;
+    color: #fff;
+    padding: 12px;
+    border-radius: 8px;
+    border: none;
+    font-weight: bold;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background 0.2s;
+    margin-top: 10px;
+    box-shadow: 0 0 15px rgba(70, 130, 180, 0.8);
+}
+
+.login-button:hover {
+    background: #35506b;
+}
+
+.login-error {
+    color: #ff6b6b;
+    background: rgba(255, 0, 0, 0.1);
+    padding: 10px;
+    border-radius: 5px;
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+.field-error {
+    color: #ff6b6b;
+    font-size: 0.85rem;
+}
+
+.login-footer {
+    text-align: center;
+    margin-top: 20px;
+    font-size: 0.9rem;
+}
+
+.login-footer a {
+    color: #ADD8E6;
+    text-decoration: none;
+}
+
+.login-footer a:hover {
+    text-decoration: underline;
+}
+
+.login-footer p {
+    margin: 8px 0;
+}

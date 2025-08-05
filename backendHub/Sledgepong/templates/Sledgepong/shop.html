@@ -1,0 +1,29 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="{% static 'Sledgepong/css/shop.css' %}">
+    <title>The Shop</title>
+</head>
+<body>
+    <div class="lobby">
+        <h1 class="main-title">The Shop</h1>
+        <div class="currency">
+            <img src="{% static 'Sledgepong/Images/coinimage.png' %}" alt="Coin Icon" class="coin-icon">
+            <span id="coinCount">0</span>
+        </div>
+        <div class="item-container">
+            {% for texture in textures %}
+                <div class="item" id="item-{{ texture.id }}">
+                    <div> {{ texture.name }} </div>
+                    <img src="{{ texture.texture_img.url }}" alt="Star Icon" class="item-icon">
+                    <div class="item-price">10 Coins</div>
+                </div>
+            {% endfor %}
+        </div>
+        <button class="nav-button" id="backButton">Back</button>
+    </div>
+    
+    <script src="shop.js"></script>
+</body>
+</html>

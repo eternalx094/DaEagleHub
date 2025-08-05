@@ -1,0 +1,78 @@
+body {
+    background-color: #ffffff;
+    background-image: url("http://127.0.0.1:8000/media/DaHub/galaxy.jpg");
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center center;
+    color: #fff;
+    font-family: Arial, sans-serif;
+    margin: 0;
+    min-height: 100vh;
+}
+
+.profile-container {
+    max-width: 500px;
+    margin: 60px auto;
+    background: rgba(0, 0, 0, 0.25);
+    border-radius: 20px;
+    box-shadow: 0 0 40px rgba(70, 130, 180, 0.5);
+    padding: 40px 30px;
+}
+
+.profile-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.profile-pic {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 4px solid #4a6c8f;
+    margin-bottom: 15px;
+}
+
+.profile-username {
+    font-size: 2.2rem;
+    font-weight: bold;
+    margin-bottom: 10px;
+    text-shadow: 0 0 10px #4a6c8f;
+}
+
+.logout-button {
+    background: #4a6c8f;
+    color: #fff;
+    padding: 10px 28px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: bold;
+    margin-top: 10px;
+    transition: background 0.2s;
+    border: none;
+    font-size: 1rem;
+    box-shadow: 0 0 15px rgba(70, 130, 180, 0.8);
+    cursor: pointer;
+}
+.logout-button:hover {
+    background: #35506b;
+}
+
+.profile-details h2 {
+    margin-top: 20px;
+    margin-bottom: 8px;
+    color: #ADD8E6;
+}
+
+.profile-details ul {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 20px 0;
+}
+
+.profile-details li {
+    margin-bottom: 6px;
+    font-size: 1.05rem;
+}

@@ -1,0 +1,30 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Profile - {{ user.username }}</title>
+    <link rel="stylesheet" href="{% static 'css/profile.css' %}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Jersey+15&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="profile-container">
+        <div class="profile-header">
+            <img src="{% static 'Images/profilepic.png' %}" alt="Profile Picture" class="profile-pic">
+            <h1 class="profile-username">{{ user.username }}</h1>
+            <a href="{% url 'logout' %}" class="logout-button">Logout</a>
+        </div>
+        <div class="profile-details">
+            <h2>About Me</h2>
+            <p>This is your profile page. You can add more information here.</p>
+            <h2>Account Details</h2>
+            <ul>
+                <li>Email: {{ user.email }}</li>
+                <li>Date joined: {{ user.date_joined|date:"F j, Y" }}</li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>

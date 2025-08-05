@@ -1,0 +1,19 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="{% static 'Sledgepong/css/menu.css' %}">
+    <title>Sledgepong</title>
+</head>
+<body>
+    <div class="modal">
+        <a id="backButton" href="{% url 'hub_view' %}">Back to Hub</a>
+        <div class="lobby">
+            <h1 class="main-title">Sledgepong</h1>
+            <a class="btns" href="{% url 'playpage' %}">Play</a>
+            <a class="btns" href="{% url 'playpage' %}">Options</a>
+            <a class="btns" href="{% url 'shop' %}">Shop</a>
+        </div>
+    </div>
+</body>
+</html>
