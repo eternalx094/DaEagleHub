@@ -8,6 +8,6 @@ class TextureAdmin(admin.ModelAdmin):
 ##############################################
 @admin.register(Player)
 class PlayerAdmin(admin.ModelAdmin):
-    list_display = ('user', 'coins', 'curtexture',)
+    list_display = ('user', 'curtexture',)
     search_fields = ('user',)
     filter_horizontal = ('collection',)

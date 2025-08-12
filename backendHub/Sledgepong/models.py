@@ -1,5 +1,5 @@
-from django.contrib.auth.models import User
 from django.db import models
+from django.contrib.auth import get_user_model
 ##############################################################################
 class Texture(models.Model):
     name = models.CharField(max_length=100)
@@ -7,9 +7,10 @@ class Texture(models.Model):
     def __str__(self):
         return self.name
 ##############################################################################
+User = get_user_model()
+##############################################################################
 class Player(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
-    coins = models.IntegerField(default=0)
     collection = models.ManyToManyField(Texture, blank=True, related_name='player_collections')
     curtexture = models.ForeignKey(Texture, on_delete=models.SET_NULL, null=True, blank=True, related_name='current_texture')
     def __str__(self):

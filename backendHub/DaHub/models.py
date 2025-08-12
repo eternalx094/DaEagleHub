@@ -1,5 +1,8 @@
+from django.contrib.auth.models import AbstractUser
 from django.db import models
 # Create your models here.
+class CustomUser(AbstractUser):
+    coins = models.IntegerField(default=0)
 
 class Application(models.Model):
     name = models.CharField(max_length=100)
