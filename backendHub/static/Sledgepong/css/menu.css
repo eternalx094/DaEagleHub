@@ -7,7 +7,7 @@ body {
   justify-content: center;
   align-items: center;
   height: 100vh;
-  font-family: 'Arial', sans-serif;
+  font-family: "Jersey 15", sans-serif;
   margin: 0;
   /* Outer glow at screen edges */
   box-shadow: 0 0 80px 40px rgba(70, 130, 180, 0.5) inset;
@@ -23,6 +23,7 @@ body {
   color: #fff;
   padding: 15px 40px;
   border-radius: 10px;
+  font-family: "Jersey 15", sans-serif;
   font-size: 20px;
   text-decoration: none;
   margin: 0;
@@ -54,6 +55,7 @@ body {
 
 /* Main title */
 .main-title {
+
   font-size: 80px;
   color: #fefefe;
   text-shadow: 0 0 20px rgba(70, 130, 180, 0.8);

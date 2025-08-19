@@ -5,9 +5,19 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="bfb72f5d-6159-44d8-95f3-55196568f59b" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/backendHub/Sledgepong/Project/images/DiscordSetup.exe" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backendHub/Sledgepong/Project/images/Docker Desktop Installer.exe" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backendHub/Sledgepong/Project/images/VIASetup.exe" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backendHub/DaHub/admin.py" beforeDir="false" afterPath="$PROJECT_DIR$/backendHub/DaHub/admin.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backendHub/DaHub/templates/DaHub/profile.html" beforeDir="false" afterPath="$PROJECT_DIR$/backendHub/DaHub/templates/DaHub/profile.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backendHub/Sledgepong/templates/Sledgepong/menu.html" beforeDir="false" afterPath="$PROJECT_DIR$/backendHub/Sledgepong/templates/Sledgepong/menu.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backendHub/Sledgepong/templates/Sledgepong/playpage.html" beforeDir="false" afterPath="$PROJECT_DIR$/backendHub/Sledgepong/templates/Sledgepong/playpage.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backendHub/Sledgepong/templates/Sledgepong/shop.html" beforeDir="false" afterPath="$PROJECT_DIR$/backendHub/Sledgepong/templates/Sledgepong/shop.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backendHub/Sledgepong/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/backendHub/Sledgepong/views.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backendHub/db.sqlite3" beforeDir="false" afterPath="$PROJECT_DIR$/backendHub/db.sqlite3" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backendHub/media/logos/sledgepong_7i2HnNO.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backendHub/static/Images/profilepic.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backendHub/static/Sledgepong/css/menu.css" beforeDir="false" afterPath="$PROJECT_DIR$/backendHub/static/Sledgepong/css/menu.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backendHub/static/Sledgepong/css/shop.css" beforeDir="false" afterPath="$PROJECT_DIR$/backendHub/static/Sledgepong/css/shop.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backendHub/static/css/profile.css" beforeDir="false" afterPath="$PROJECT_DIR$/backendHub/static/css/profile.css" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -44,18 +54,19 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "DefaultHtmlFileTemplate": "HTML File",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "SHELLCHECK.PATH": "C:\\Users\\etern\\AppData\\Roaming\\JetBrains\\PyCharmCE2024.2\\plugins\\Shell Script\\shellcheck.exe",
-    "git-widget-placeholder": "main",
-    "ignore.virus.scanning.warn.message": "true",
-    "last_opened_file_path": "C:/Users/etern/PycharmProjects/DaEagleHub/backendHub/static/Images",
-    "settings.editor.selected.configurable": "preferences.pluginManager"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;DefaultHtmlFileTemplate&quot;: &quot;HTML File&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;SHELLCHECK.PATH&quot;: &quot;C:\\Users\\etern\\AppData\\Roaming\\JetBrains\\PyCharmCE2024.2\\plugins\\Shell Script\\shellcheck.exe&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/etern/PycharmProjects/DaEagleHub/backendHub/static/Images&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.pluginManager&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="C:\Users\etern\PycharmProjects\DaEagleHub\backendHub\static\Images" />
@@ -75,7 +86,7 @@
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-python-sdk-4c141bd692a7-e2d783800521-com.jetbrains.pycharm.community.sharedIndexes.bundled-PC-251.26927.90" />
+        <option value="bundled-python-sdk-d9fa9deec7cb-d902c0275401-com.jetbrains.pycharm.community.sharedIndexes.bundled-PC-252.23892.515" />
       </set>
     </attachedChunks>
   </component>

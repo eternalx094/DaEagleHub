@@ -76,3 +76,31 @@ body {
     margin-bottom: 6px;
     font-size: 1.05rem;
 }
+/* Hub button styling */
+.hub-button-container {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    z-index: 10;
+}
+
+.hub-button {
+    background-color: #5a1073;
+    opacity: 0.8;
+    border: none;
+    color: white;
+    padding: 12px 24px;
+    text-decoration: none;
+    font-size: 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    box-shadow: 0 0 10px rgba(128, 0, 128, 0.7);
+    transition: box-shadow 0.3s ease-in-out, opacity 0.3s ease-in-out;
+    font-family: "Jersey 15", sans-serif;
+    display: inline-block;
+}
+
+.hub-button:hover {
+    box-shadow: 0 0 25px rgba(128, 0, 128, 1);
+    opacity: 1;
+}

@@ -35,6 +35,7 @@ body {
   
   /* Huge title styling */
   .main-title {
+    font-family: "Jersey 15", sans-serif;
     font-size: 80px;           /* Huge font size */
     color: #fefefe;            /* White color */
     text-shadow: 0 0 20px rgba(70, 130, 180, 0.8); /* Glowing bluish effect */
@@ -61,6 +62,7 @@ body {
   
   /* Back button aligned to the top-left using absolute positioning */
   #backButton {
+    font-family: "Jersey 15", sans-serif;
     position: absolute; /* Now absolute to the container */
     top: 0;             /* Set to the very top */
     left: 0;            /* Set to the very left */
@@ -86,22 +88,25 @@ body {
 
 /* Individual item styling */
 .item {
+  font-family: "Jersey 15", sans-serif;
   background-color: #4a6c8f; /* Background color for items */
   color: white; /* Text color */
   border-radius: 10px; /* Rounded corners */
   padding: 20px; /* Padding inside the item */
   width: 120px; /* Fixed width for items */
   text-align: center; /* Center text */
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5); /* Subtle shadow for depth */
+  box-shadow: 0 0 15px rgba(70, 130, 180, 0.8); /* Glowing bluish aura */
   transition: transform 0.3s; /* Smooth scaling effect */
 }
 
 .item:hover {
   transform: scale(1.05); /* Scale up on hover */
+  box-shadow: 0 0 30px rgba(70, 130, 180, 1); /* Stronger aura on hover */
 }
 
 /* Item price styling */
 .item-price {
+  font-family: "Jersey 15", sans-serif;
   margin-top: 10px; /* Space above the price */
   font-size: 16px; /* Font size for the price */
 }
@@ -115,6 +120,7 @@ body {
 }
 
 #coinCount {
+  font-family: "Jersey 15", sans-serif;
   font-size: 16px; /* Font size for the coin count */
   color: #fefefe; /* White color for the coin count */
   margin-top: 10px; /* Space above the coin count */

@@ -3,6 +3,9 @@
 <html lang="en">
 <head>
     <link rel="stylesheet" href="{% static 'Sledgepong/css/shop.css' %}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Jersey+15&display=swap" rel="stylesheet">
     <title>The Shop</title>
 </head>
 <body>
@@ -24,6 +27,21 @@
         <button class="nav-button" id="backButton">Back</button>
     </div>
     
-    <script src="shop.js"></script>
+    <script>
+document.addEventListener('DOMContentLoaded', function() {
+    const backButton = document.getElementById('backButton');
+
+    backButton.addEventListener('click', function() {
+        // Option A: Go back to previous page
+        window.history.back();
+
+         //Option B: Go to specific URL (recommended)
+         window.location.href = "{% url 'Sledgepong' %}";  // Replace with your actual URL name
+
+        // Option C: Go to hub
+        // window.location.href = "{% url 'hub_view' %}";
+    });
+});
+</script>
 </body>
 </html>
