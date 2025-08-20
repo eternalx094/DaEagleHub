@@ -10,7 +10,7 @@ class Texture(models.Model):
 User = get_user_model()
 ##############################################################################
 class Player(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True, related_name="sldgpng_player")
     collection = models.ManyToManyField(Texture, blank=True, related_name='player_collections')
     curtexture = models.ForeignKey(Texture, on_delete=models.SET_NULL, null=True, blank=True, related_name='current_texture')
     def __str__(self):

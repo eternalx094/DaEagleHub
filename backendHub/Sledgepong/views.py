@@ -17,5 +17,14 @@ def singles_view(request):
 ############################################################################################################### <-- this is a divider
 def shop_view(request):
     textures = Texture.objects.all()
-    return render(request, 'Sledgepong/shop.html', context={"textures": textures})
+    user = request.user
+    coins = user.coins
+    collected_textures = user.sldgpng_player.first().collection
+    current_texture = user.sldgpng_player.first().curtexture
+    return render(request, 'Sledgepong/shop.html', context={
+                                                            'textures': textures,
+                                                            'coins': coins,
+                                                            'collected_textures': collected_textures,
+                                                            'current_texture': current_texture,
+})
 ################################################################################################################ <-- this is a divider

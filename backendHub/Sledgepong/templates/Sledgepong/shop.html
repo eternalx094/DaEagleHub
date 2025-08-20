@@ -13,13 +13,18 @@
         <h1 class="main-title">The Shop</h1>
         <div class="currency">
             <img src="{% static 'Sledgepong/Images/coinimage.png' %}" alt="Coin Icon" class="coin-icon">
-            <span id="coinCount">0</span>
+            <span id="coinCount">{{ coins }}</span>
         </div>
         <div class="item-container">
+            <div class="current_item" id="item-{{ current_texture.id }}">
+                    <div> {{ current_texture.name }} </div>
+                    <img src="{{ current_texture.texture_img.url }}" alt="Texture Icon" class="item-icon">
+                    <div class="item-price">10 Coins</div>
+                </div>
             {% for texture in textures %}
                 <div class="item" id="item-{{ texture.id }}">
                     <div> {{ texture.name }} </div>
-                    <img src="{{ texture.texture_img.url }}" alt="Star Icon" class="item-icon">
+                    <img src="{{ texture.texture_img.url }}" alt="Texture Icon" class="item-icon">
                     <div class="item-price">10 Coins</div>
                 </div>
             {% endfor %}
