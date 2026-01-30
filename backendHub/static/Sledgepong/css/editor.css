@@ -1,0 +1,82 @@
+body {
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: #1c1f4a;
+    color: white;
+    font-family: "Jersey 15", Arial, sans-serif;
+    height: 100vh;
+    box-shadow: 0 0 80px 40px rgba(70, 130, 180, 0.5) inset;
+    position: relative;
+}
+
+.editor-banner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 18px;
+}
+
+.editor-title {
+    font-family: "Jersey 15", Arial, sans-serif;
+    font-size: 72px;
+    color: #f7fbff;
+    text-shadow: 0 0 20px rgba(120, 190, 255, 0.75);
+    letter-spacing: 2px;
+    margin: 0;
+    cursor: default;
+    transition: color 0.25s ease, text-shadow 0.25s ease;
+}
+
+.editor-title:hover {
+    color: #d6f3ff;
+    text-shadow: 0 0 25px rgba(140, 200, 255, 0.85), 0 0 55px rgba(90, 160, 255, 0.75);
+}
+
+#toolbar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background-color: #2c2f5c;
+    padding: 10px;
+    border-radius: 10px;
+    margin: 10px 0;
+}
+
+button {
+    background-color: #3b3fff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 8px 12px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+button:hover {
+    background-color: #5c5fff;
+}
+
+#editorCanvas {
+    background-color: black;
+    border: 3px solid white;
+    cursor: crosshair;
+    width: 90vw;
+    height: 75vh;
+    display: block;
+}
+.back-button {
+    position: absolute;
+    top: 10px; /* 10px from the top of the screen */
+    left: 10px; /* 10px from the left edge of the screen */
+    padding: 10px 20px;
+    background-color: #ff5555; /* Red background for visibility */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    z-index: 10; /* Ensure the button stays above the canvas */
+}

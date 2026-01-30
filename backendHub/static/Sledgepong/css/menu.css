@@ -35,6 +35,14 @@ body {
   background: #35506b;
 }
 
+.modal-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 40px; /* increases space between buttons */
+  padding: 40px; /* adds spacing inside the container */
+}
 /* Modal container */
 .modal {
   padding: 40px 60px;

@@ -162,10 +162,40 @@ button:hover {
   padding: 20px; /* Padding inside the item */
   width: 120px; /* Fixed width for items */
   text-align: center; /* Center text */
-  box-shadow: 0 0 15px rgba(70, 180, 130, 0.8); /* Glowing bluish aura */
+  box-shadow: 0 0 15px rgba(255, 255, 255, 0.8); /* Glowing aura */
   transition: transform 0.3s; /* Smooth scaling effect */
 }
 .current_item:hover {
   transform: scale(1.05); /* Scale up on hover */
-  box-shadow: 0 0 30px rgba(70, 180, 130, 1); /* Stronger aura on hover */
+  box-shadow: 0 0 30px rgba(0, 255, 0, 1); /* Stronger aura on hover */
+}
+.collected_items{
+  font-family: "Jersey 15", sans-serif;
+  background-color: rgba(0, 0, 255, 0.8); /* Background color for items */
+  color: white; /* Text color */
+  border-radius: 10px; /* Rounded corners */
+  padding: 20px; /* Padding inside the item */
+  width: 120px; /* Fixed width for items */
+  text-align: center; /* Center text */
+  box-shadow: 0 0 15px rgba(255, 255, 255, 0.8); /* Glowing aura */
+  transition: transform 0.3s; /* Smooth scaling effect */
+}
+.collected_items:hover {
+  transform: scale(1.05); /* Scale up on hover */
+  box-shadow: 0 0 30px rgba(0, 0, 255, 0.8); /* Stronger aura on hover */
+}
+.non_collected_items{
+  font-family: "Jersey 15", sans-serif;
+  background-color: rgba(255, 0, 0, 0.8); /* Background color for items */
+  color: white; /* Text color */
+  border-radius: 10px; /* Rounded corners */
+  padding: 20px; /* Padding inside the item */
+  width: 120px; /* Fixed width for items */
+  text-align: center; /* Center text */
+  box-shadow: 0 0 15px rgba(255, 255, 255, 0.8); /* Glowing aura */
+  transition: transform 0.3s; /* Smooth scaling effect */
+}
+.non_collected_items:hover {
+  transform: scale(1.05); /* Scale up on hover */
+  box-shadow: 0 0 30px rgba(255, 0, 0, 1); /* Stronger aura on hover */
 }

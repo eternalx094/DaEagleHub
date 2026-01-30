@@ -1,10 +1,20 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>$Title$</title>
+    <meta charset="UTF-8">
+    <title>Sledgepong Level Editor</title>
+    <link rel="stylesheet" href="{% static 'Sledgepong/css/editor.css' %}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Jersey+15&display=swap" rel="stylesheet">
 </head>
 <body>
-$END$
+    <a id="backButton" class="back-button" href="{% url 'playpage' %}">Back</a>
+    <div class="editor-banner">
+        <h1 class="editor-title">Level Editor</h1>
+    </div>
+    <canvas id="editorCanvas" ></canvas>
+    <script src="{% static 'Sledgepong/js/editor.js' %}"></script>
 </body>
 </html>

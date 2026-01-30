@@ -1,0 +1,28 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="{% static 'Sledgepong/css/game.css' %}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Jersey+15&display=swap" rel="stylesheet">
+    <title>Sledgepong - Game</title>
+</head>
+<body>
+    <canvas id="gameCanvas" width="800" height="600"></canvas>
+
+    <!-- Back button -->
+    <a id="backButton" class="back-button" href="{% url 'playpage' %}">Back</a>
+
+    <!-- Inject Django variables for JS -->
+    <script>
+       // let coinsCollected = {{ coins|default:0 }};
+       //let currentTexture = "{% if current_texture %}{{ current_texture }}{% else %}{% static 'Sledgepong/images/classic.png' %}{% endif %}";
+    </script>
+
+    <script src="{% static 'Sledgepong/js/game.js' %}"></script>
+
+</body>
+</html>
+

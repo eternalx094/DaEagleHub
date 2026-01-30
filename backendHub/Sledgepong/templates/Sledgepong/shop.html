@@ -16,14 +16,21 @@
             <span id="coinCount">{{ coins }}</span>
         </div>
         <div class="item-container">
-            <div class="current_item" id="item-{{ current_texture.id }}">
-                    <div> {{ current_texture.name }} </div>
-                    <img src="{{ current_texture.texture_img.url }}" alt="Texture Icon" class="item-icon">
-                    <div class="item-price">10 Coins</div>
+            <div class="current_item" id="item-{{ current_texture.id }}" data-texture-id="{{ current_texture.id }}">
+                <div>{{ current_texture.name }}</div>
+                <img src="{{ current_texture.texture_img.url }}" alt="Texture Icon" class="item-icon">
+                <div class="item-price">Equipped</div>
+            </div>
+            {% for texture in collected_textures %}
+                <div class="collected_items" id="item-{{ texture.id }}" data-texture-id="{{ texture.id }}">
+                    <div>{{ texture.name }}</div>
+                    <img src="{{ texture.texture_img.url }}" alt="Texture Icon" class="item-icon">
+                    <div class="item-price">Owned</div>
                 </div>
-            {% for texture in textures %}
-                <div class="item" id="item-{{ texture.id }}">
-                    <div> {{ texture.name }} </div>
+            {% endfor %}
+            {% for texture in non_collected_textures %}
+                <div class="non_collected_items" data-texture-id="{{ texture.id }}">
+                    <div>{{ texture.name }}</div>
                     <img src="{{ texture.texture_img.url }}" alt="Texture Icon" class="item-icon">
                     <div class="item-price">10 Coins</div>
                 </div>
@@ -31,22 +38,6 @@
         </div>
         <button class="nav-button" id="backButton">Back</button>
     </div>
-    
-    <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const backButton = document.getElementById('backButton');
-
-    backButton.addEventListener('click', function() {
-        // Option A: Go back to previous page
-        window.history.back();
-
-         //Option B: Go to specific URL (recommended)
-         window.location.href = "{% url 'Sledgepong' %}";  // Replace with your actual URL name
-
-        // Option C: Go to hub
-        // window.location.href = "{% url 'hub_view' %}";
-    });
-});
-</script>
+    <script src="{% static 'Sledgepong/js/shop.js' %}"></script>
 </body>
 </html>
