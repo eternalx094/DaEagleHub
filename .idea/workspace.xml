@@ -6,18 +6,7 @@
   <component name="ChangeListManager">
     <list default="true" id="bfb72f5d-6159-44d8-95f3-55196568f59b" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backendHub/DaHub/admin.py" beforeDir="false" afterPath="$PROJECT_DIR$/backendHub/DaHub/admin.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backendHub/DaHub/templates/DaHub/profile.html" beforeDir="false" afterPath="$PROJECT_DIR$/backendHub/DaHub/templates/DaHub/profile.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backendHub/Sledgepong/templates/Sledgepong/menu.html" beforeDir="false" afterPath="$PROJECT_DIR$/backendHub/Sledgepong/templates/Sledgepong/menu.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backendHub/Sledgepong/templates/Sledgepong/playpage.html" beforeDir="false" afterPath="$PROJECT_DIR$/backendHub/Sledgepong/templates/Sledgepong/playpage.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backendHub/Sledgepong/templates/Sledgepong/shop.html" beforeDir="false" afterPath="$PROJECT_DIR$/backendHub/Sledgepong/templates/Sledgepong/shop.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backendHub/Sledgepong/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/backendHub/Sledgepong/views.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backendHub/db.sqlite3" beforeDir="false" afterPath="$PROJECT_DIR$/backendHub/db.sqlite3" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backendHub/media/logos/sledgepong_7i2HnNO.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backendHub/static/Images/profilepic.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backendHub/static/Sledgepong/css/menu.css" beforeDir="false" afterPath="$PROJECT_DIR$/backendHub/static/Sledgepong/css/menu.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backendHub/static/Sledgepong/css/shop.css" beforeDir="false" afterPath="$PROJECT_DIR$/backendHub/static/Sledgepong/css/shop.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backendHub/static/css/profile.css" beforeDir="false" afterPath="$PROJECT_DIR$/backendHub/static/css/profile.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/qodana.yaml" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -43,7 +32,6 @@
     <option name="selectedTabId" value="QODANA_PROBLEMS_VIEW_TAB" />
   </component>
   <component name="ProjectColorInfo">{
-  &quot;customColor&quot;: &quot;ff0000ff&quot;,
   &quot;associatedIndex&quot;: 4
 }</component>
   <component name="ProjectId" id="2uUYdubjysYSeBXVK1oljxm9StI" />
@@ -60,33 +48,45 @@
     &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
     &quot;SHELLCHECK.PATH&quot;: &quot;C:\\Users\\etern\\AppData\\Roaming\\JetBrains\\PyCharmCE2024.2\\plugins\\Shell Script\\shellcheck.exe&quot;,
+    &quot;com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultAutoModeForALLUsers.v1&quot;: &quot;true&quot;,
+    &quot;com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1&quot;: &quot;true&quot;,
     &quot;git-widget-placeholder&quot;: &quot;main&quot;,
     &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;C:/Users/etern/PycharmProjects/DaEagleHub/backendHub/static/Images&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.pluginManager&quot;
+    &quot;javascript.preferred.runtime.type.id&quot;: &quot;node&quot;,
+    &quot;junie.onboarding.icon.badge.shown&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/etern/PycharmProjects/DaEagleHub&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.pluginManager&quot;,
+    &quot;to.speed.mode.migration.done&quot;: &quot;true&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
 }</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\etern\PycharmProjects\DaEagleHub\backendHub\DaHub\Images" />
       <recent name="C:\Users\etern\PycharmProjects\DaEagleHub\backendHub\static\Images" />
       <recent name="C:\Users\etern\PycharmProjects\DaEagleHub\backendHub\static\Sledgepong\Images" />
       <recent name="C:\Users\etern\PycharmProjects\DaEagleHub\backendHub\static\logo" />
       <recent name="C:\Users\etern\PycharmProjects\DaEagleHub\backendHub\media\DaHub" />
-      <recent name="C:\Users\etern\PycharmProjects\DaEagleHub\backendHub\Sledgepong\Project" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\etern\PycharmProjects\DaEagleHub\backendHub\static" />
       <recent name="C:\Users\etern\PycharmProjects\DaEagleHub\backendHub\static\Images" />
       <recent name="C:\Users\etern\PycharmProjects\DaEagleHub\backendHub\static\Sledgepong\js" />
       <recent name="C:\Users\etern\PycharmProjects\DaEagleHub\backendHub\static\Sledgepong\css" />
       <recent name="C:\Users\etern\PycharmProjects\DaEagleHub\backendHub\Sledgepong\templates\Sledgepong" />
-      <recent name="C:\Users\etern\PycharmProjects\DaEagleHub" />
     </key>
   </component>
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-python-sdk-d9fa9deec7cb-d902c0275401-com.jetbrains.pycharm.community.sharedIndexes.bundled-PC-252.23892.515" />
+        <option value="bundled-js-predefined-d6986cc7102b-9b0f141eb926-JavaScript-WS-253.30387.83" />
       </set>
     </attachedChunks>
   </component>
@@ -98,7 +98,35 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1742304710682</updated>
+      <workItem from="1761312357901" duration="408000" />
+      <workItem from="1761313437001" duration="1000" />
+      <workItem from="1761921010132" duration="708000" />
+      <workItem from="1761921844845" duration="6106000" />
+      <workItem from="1763478608507" duration="94000" />
+      <workItem from="1763478733572" duration="111000" />
+      <workItem from="1763478868626" duration="2400000" />
+      <workItem from="1763557865899" duration="9739000" />
+      <workItem from="1764085662470" duration="1387000" />
+      <workItem from="1764338664604" duration="3588000" />
+      <workItem from="1764513431508" duration="592000" />
+      <workItem from="1764943465053" duration="1725000" />
+      <workItem from="1764945935627" duration="1839000" />
+      <workItem from="1765047713890" duration="310000" />
+      <workItem from="1765048046160" duration="561000" />
+      <workItem from="1765292579811" duration="2422000" />
+      <workItem from="1765296243979" duration="1740000" />
+      <workItem from="1766213397284" duration="4000" />
+      <workItem from="1766745154001" duration="1228000" />
+      <workItem from="1767219517498" duration="721000" />
+      <workItem from="1769526871771" duration="484000" />
+      <workItem from="1769527418212" duration="117000" />
+      <workItem from="1769527655557" duration="3192000" />
+      <workItem from="1769782233373" duration="5540000" />
+      <workItem from="1770132901245" duration="4000" />
     </task>
     <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
   </component>
 </project>
