@@ -1,10 +1,22 @@
 services:
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./backendHub/static:/static:ro
+      - ./backendHub/media:/media:ro
+    depends_on:
+      - backend
+
   backend:
     build: ./backendHub
-    ports:
-      - "8000:8000"
+    container_name: backend
+    expose:
+      - "8000"
     volumes:
-        - ./backendHub/db.sqlite3:/app/db.sqlite3
-        - ./backendHub/static:/app/static
-        - ./backendHub/media:/app/media
+      - ./backendHub/db.sqlite3:/app/db.sqlite3
+      - ./backendHub/static:/app/static
+      - ./backendHub/media:/app/media
     command: ./entrypoint.sh

@@ -5,8 +5,14 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="bfb72f5d-6159-44d8-95f3-55196568f59b" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/nginx/nginx.conf" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/qodana.yaml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backendHub/DaHub/templates/DaHub/DaHub.html" beforeDir="false" afterPath="$PROJECT_DIR$/backendHub/DaHub/templates/DaHub/DaHub.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backendHub/db.sqlite3" beforeDir="false" afterPath="$PROJECT_DIR$/backendHub/db.sqlite3" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backendHub/media/DaHub/galaxy.jpg" beforeDir="false" afterPath="$PROJECT_DIR$/backendHub/static/Images/DaHub/galaxy.jpg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backendHub/static/Images/profilepic.png" beforeDir="false" afterPath="$PROJECT_DIR$/backendHub/static/Images/DaHub/profilepic.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backendHub/static/css/DaHub.css" beforeDir="false" afterPath="$PROJECT_DIR$/backendHub/static/css/DaHub.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docker-compose.yml" beforeDir="false" afterPath="$PROJECT_DIR$/docker-compose.yml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -76,17 +82,17 @@
       <recent name="C:\Users\etern\PycharmProjects\DaEagleHub\backendHub\media\DaHub" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
-      <recent name="C:\Users\etern\PycharmProjects\DaEagleHub\backendHub\static" />
+      <recent name="C:\Users\etern\PycharmProjects\DaEagleHub\backendHub\static\Images\DaHub" />
       <recent name="C:\Users\etern\PycharmProjects\DaEagleHub\backendHub\static\Images" />
+      <recent name="C:\Users\etern\PycharmProjects\DaEagleHub\backendHub\static" />
       <recent name="C:\Users\etern\PycharmProjects\DaEagleHub\backendHub\static\Sledgepong\js" />
       <recent name="C:\Users\etern\PycharmProjects\DaEagleHub\backendHub\static\Sledgepong\css" />
-      <recent name="C:\Users\etern\PycharmProjects\DaEagleHub\backendHub\Sledgepong\templates\Sledgepong" />
     </key>
   </component>
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-js-predefined-d6986cc7102b-9b0f141eb926-JavaScript-WS-253.30387.83" />
+        <option value="bundled-python-sdk-4762d8aabb82-6d6dccd035ac-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-253.30387.173" />
       </set>
     </attachedChunks>
   </component>
