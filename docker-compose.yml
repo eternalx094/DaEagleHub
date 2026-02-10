@@ -16,7 +16,5 @@ services:
     expose:
       - "8000"
     volumes:
-      - ./backendHub/db.sqlite3:/app/db.sqlite3
-      - ./backendHub/static:/app/static
-      - ./backendHub/media:/app/media
+      - ./backendHub:/app
     command: ./entrypoint.sh
