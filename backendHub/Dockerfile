@@ -1,4 +1,4 @@
-FROM python:3
+FROM python:3.12
 RUN apt-get update
 WORKDIR /app
 EXPOSE 8000
