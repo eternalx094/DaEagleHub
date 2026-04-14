@@ -2,13 +2,14 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <link rel="stylesheet" href="{% static 'Sledgepong/css/shop.css' %}">
+    <link rel="stylesheet" href="{% static 'Sledgepong/css/shop.css' %}?v=galaxy1">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Jersey+15&display=swap" rel="stylesheet">
     <title>The Shop</title>
 </head>
 <body>
+    <button class="nav-button" id="backButton">Back</button>
     <div class="lobby">
         <h1 class="main-title">The Shop</h1>
         <div class="currency">
@@ -36,8 +37,8 @@
                 </div>
             {% endfor %}
         </div>
-        <button class="nav-button" id="backButton">Back</button>
+        
     </div>
-    <script src="{% static 'Sledgepong/js/shop.js' %}"></script>
+    <script src="{% static 'Sledgepong/js/shop.js' %}?v=galaxy1"></script>
 </body>
 </html>

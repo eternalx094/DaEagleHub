@@ -1,201 +1,184 @@
-/* General body styling for the lobby */
+:root {
+    --bg-1: #070b1e;
+    --bg-2: #0f183b;
+    --bg-3: #1b0f37;
+    --glow-1: rgba(120, 220, 255, 0.45);
+    --glow-2: rgba(140, 120, 255, 0.4);
+    --panel: rgba(12, 18, 40, 0.72);
+    --panel-border: rgba(130, 210, 255, 0.3);
+    --text: #eaf6ff;
+}
+
 body {
-    background-color: #1c1f4a; /* Dark bluish background */
+    margin: 0;
+    min-height: 100vh;
     display: flex;
-    justify-content: center;
     align-items: center;
-    height: 100vh;
-    font-family: 'Arial', sans-serif;
-  }
-  
-  /* Bluish button style */
-  button {
-    background-color: #4a6c8f; /* Bluish color */
-    color: white;
-    border: none;
-    padding: 15px 30px;
-    font-size: 18px;
-    cursor: pointer;
-    border-radius: 10px;
-    box-shadow: 0 0 15px rgba(70, 130, 180, 0.8); /* Glowing bluish aura */
-    transition: 0.3s;
-  }
-  
-  button:hover {
-    box-shadow: 0 0 30px rgba(70, 130, 180, 1); /* Stronger aura on hover */
-  }
-  
-  /* Centering lobby content */
-  .lobby {
+    justify-content: center;
+    background:
+        radial-gradient(circle at 15% 20%, rgba(35, 70, 160, 0.85) 0%, rgba(20, 30, 80, 0.4) 35%, transparent 60%),
+        radial-gradient(circle at 80% 80%, rgba(120, 80, 220, 0.55) 0%, rgba(10, 12, 40, 0.2) 45%, transparent 70%),
+        linear-gradient(135deg, var(--bg-2) 0%, var(--bg-1) 55%, var(--bg-3) 100%);
+    background-size: 200% 200%;
+    animation: shopBgShift 18s ease-in-out infinite;
+    font-family: "Jersey 15", sans-serif;
+    color: var(--text);
+    overflow: hidden;
+}
+
+body::before,
+body::after {
+    content: "";
+    position: absolute;
+    width: 520px;
+    height: 520px;
+    border-radius: 50%;
+    filter: blur(80px);
+    opacity: 0.6;
+    z-index: 0;
+    animation: shopGlowFloat 16s ease-in-out infinite;
+}
+
+body::before {
+    background: radial-gradient(circle, var(--glow-1), transparent 60%);
+    top: -140px;
+    left: -120px;
+}
+
+body::after {
+    background: radial-gradient(circle, var(--glow-2), transparent 60%);
+    bottom: -140px;
+    right: -140px;
+}
+
+.lobby {
+    width: min(1200px, 90vw);
+    background: var(--panel);
+    border: 1px solid var(--panel-border);
+    border-radius: 20px;
+    padding: 32px 40px 36px;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 20px;
-  }
-  
-  /* Huge title styling */
-  .main-title {
-    font-family: "Jersey 15", sans-serif;
-    font-size: 80px;           /* Huge font size */
-    color: #fefefe;            /* White color */
-    text-shadow: 0 0 20px rgba(70, 130, 180, 0.8); /* Glowing bluish effect */
-    margin-bottom: 30px;       /* Add space below the title */
-    transition: color 0.3s;    /* Smooth transition for color change */
-  }
-  
-  /* Hover effect: Turn title light blue */
-  .main-title:hover {
-    color: #ADD8E6;            /* Light blue on hover */
-    text-shadow: 0 0 30px rgba(70, 130, 180, 1); /* Stronger glow */
-  }
-  
-  /* Play page styling with Flexbox */
-  #playpage {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    position: relative; /* For absolute positioning of the back button */
-    height: 100vh;
-    width: 100vw;
-  }
-  
-  /* Back button aligned to the top-left using absolute positioning */
-  #backButton {
-    font-family: "Jersey 15", sans-serif;
-    position: absolute; /* Now absolute to the container */
-    top: 0;             /* Set to the very top */
-    left: 0;            /* Set to the very left */
-    margin: 10px;       /* Add margin for space from the edges */
-  }
-  
-  /* Modal content styling */
-  .modal-content {
+    gap: 18px;
+    box-shadow: 0 20px 60px rgba(6, 12, 28, 0.55), 0 0 45px rgba(90, 160, 255, 0.2);
+    backdrop-filter: blur(10px);
+    z-index: 1;
+}
+
+.main-title {
+    font-size: 72px;
     color: #fefefe;
-    padding: 20px;
-    border-radius: 10px;
-    text-align: center;
-  }
-  
-/* Item container styling */
-.item-container {
-  display: flex;
-  justify-content: center;
-  flex-wrap: wrap; /* Allows items to wrap to the next line */
-  gap: 20px; /* Space between items */
-  margin: 20px 0; /* Space above and below the item container */
+    text-shadow: 0 0 24px rgba(120, 210, 255, 0.75), 0 0 50px rgba(90, 140, 255, 0.35);
+    margin: 0;
 }
 
-/* Individual item styling */
-.item {
-  font-family: "Jersey 15", sans-serif;
-  background-color: #4a6c8f; /* Background color for items */
-  color: white; /* Text color */
-  border-radius: 10px; /* Rounded corners */
-  padding: 20px; /* Padding inside the item */
-  width: 120px; /* Fixed width for items */
-  text-align: center; /* Center text */
-  box-shadow: 0 0 15px rgba(70, 130, 180, 0.8); /* Glowing bluish aura */
-  transition: transform 0.3s; /* Smooth scaling effect */
+.currency {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 18px;
+    background: rgba(8, 12, 28, 0.6);
+    border-radius: 12px;
+    border: 1px solid rgba(120, 200, 255, 0.3);
+    box-shadow: inset 0 0 16px rgba(120, 200, 255, 0.2);
 }
 
-.item:hover {
-  transform: scale(1.05); /* Scale up on hover */
-  box-shadow: 0 0 30px rgba(70, 130, 180, 1); /* Stronger aura on hover */
-}
-
-/* Item price styling */
-.item-price {
-  font-family: "Jersey 15", sans-serif;
-  margin-top: 10px; /* Space above the price */
-  font-size: 16px; /* Font size for the price */
-}
-
-/* Coin icon styling */
 .coin-icon {
-  width: 30px; /* Adjust the size as needed */
-  height: auto; /* Maintain aspect ratio */
-  vertical-align: middle; /* Align with text */
-  margin-right: 5px; /* Space between icon and text */
+    width: 28px;
+    height: 28px;
 }
 
 #coinCount {
-  font-family: "Jersey 15", sans-serif;
-  font-size: 16px; /* Font size for the coin count */
-  color: #fefefe; /* White color for the coin count */
-  margin-top: 10px; /* Space above the coin count */
+    font-size: 20px;
+    color: #fefefe;
+}
+
+.item-container {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 18px;
+    margin: 10px 0 0;
+}
+
+.current_item,
+.collected_items,
+.non_collected_items {
+    background: rgba(10, 16, 36, 0.78);
+    color: #fefefe;
+    border-radius: 14px;
+    padding: 16px 14px;
+    text-align: center;
+    box-shadow: 0 10px 20px rgba(40, 80, 140, 0.35), 0 0 22px rgba(120, 200, 255, 0.25);
+    transition: transform 0.2s, box-shadow 0.2s, border 0.2s;
+    cursor: pointer;
+    border: 1px solid rgba(120, 200, 255, 0.2);
+}
+
+.current_item {
+    border: 1px solid rgba(120, 255, 200, 0.6);
+    box-shadow: 0 12px 26px rgba(40, 120, 90, 0.45), 0 0 30px rgba(120, 255, 200, 0.45);
+}
+
+.collected_items {
+    border: 1px solid rgba(120, 180, 255, 0.5);
+    box-shadow: 0 10px 22px rgba(40, 90, 160, 0.35), 0 0 28px rgba(120, 200, 255, 0.35);
+}
+
+.non_collected_items {
+    border: 1px solid rgba(255, 120, 160, 0.5);
+    box-shadow: 0 10px 22px rgba(160, 60, 90, 0.35), 0 0 28px rgba(255, 140, 170, 0.35);
+}
+
+.current_item:hover,
+.collected_items:hover,
+.non_collected_items:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 14px 30px rgba(40, 90, 160, 0.55), 0 0 40px rgba(120, 210, 255, 0.55);
 }
 
 .item-icon {
-  width: 50px; /* Adjust the size as needed */
-  height: auto; /* Maintain aspect ratio */
-  vertical-align: middle; /* Align with text */
-  margin-right: 5px; /* Space between icon and text */
-}
-.equipped {
-  background-color: #4CAF50 !important; /* Green background for equipped items */
-  color: white !important;
+    width: 64px;
+    height: auto;
+    margin: 8px 0;
 }
 
-.available {
-  background-color: #008CBA !important; /* Blue background for available but not equipped items */
-  color: white !important;
+.item-price {
+    margin-top: 6px;
+    font-size: 16px;
+    color: #dff4ff;
 }
 
-button {
-  transition: all 0.3s ease;
-  margin: 5px;
-  padding: 10px 20px;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
+#backButton {
+    position: fixed;
+    top: 10px;
+    left: 10px;
+    padding: 10px 20px;
+    background: linear-gradient(135deg, rgba(120, 180, 255, 0.9), rgba(90, 120, 255, 0.9));
+    color: #f7fbff;
+    border: none;
+    border-radius: 8px;
+    font-size: 18px;
+    cursor: pointer;
+    z-index: 10;
+    text-decoration: none;
+    box-shadow: 0 10px 22px rgba(40, 90, 160, 0.35), 0 0 18px rgba(120, 210, 255, 0.35);
+    transition: background 0.2s, box-shadow 0.2s;
+    font-family: "Jersey 15", sans-serif;
 }
 
-button:hover {
-  opacity: 0.8;
+#backButton:hover {
+    background: linear-gradient(135deg, rgba(140, 200, 255, 1), rgba(110, 140, 255, 1));
+    box-shadow: 0 12px 26px rgba(40, 90, 160, 0.45), 0 0 26px rgba(120, 210, 255, 0.5);
 }
-.current_item {
-  font-family: "Jersey 15", sans-serif;
-  background-color: #38b261; /* Background color for items */
-  color: white; /* Text color */
-  border-radius: 10px; /* Rounded corners */
-  padding: 20px; /* Padding inside the item */
-  width: 120px; /* Fixed width for items */
-  text-align: center; /* Center text */
-  box-shadow: 0 0 15px rgba(255, 255, 255, 0.8); /* Glowing aura */
-  transition: transform 0.3s; /* Smooth scaling effect */
+
+@keyframes shopGlowFloat {
+    0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+    50% { transform: translate3d(30px, -20px, 0) scale(1.05); }
 }
-.current_item:hover {
-  transform: scale(1.05); /* Scale up on hover */
-  box-shadow: 0 0 30px rgba(0, 255, 0, 1); /* Stronger aura on hover */
-}
-.collected_items{
-  font-family: "Jersey 15", sans-serif;
-  background-color: rgba(0, 0, 255, 0.8); /* Background color for items */
-  color: white; /* Text color */
-  border-radius: 10px; /* Rounded corners */
-  padding: 20px; /* Padding inside the item */
-  width: 120px; /* Fixed width for items */
-  text-align: center; /* Center text */
-  box-shadow: 0 0 15px rgba(255, 255, 255, 0.8); /* Glowing aura */
-  transition: transform 0.3s; /* Smooth scaling effect */
-}
-.collected_items:hover {
-  transform: scale(1.05); /* Scale up on hover */
-  box-shadow: 0 0 30px rgba(0, 0, 255, 0.8); /* Stronger aura on hover */
-}
-.non_collected_items{
-  font-family: "Jersey 15", sans-serif;
-  background-color: rgba(255, 0, 0, 0.8); /* Background color for items */
-  color: white; /* Text color */
-  border-radius: 10px; /* Rounded corners */
-  padding: 20px; /* Padding inside the item */
-  width: 120px; /* Fixed width for items */
-  text-align: center; /* Center text */
-  box-shadow: 0 0 15px rgba(255, 255, 255, 0.8); /* Glowing aura */
-  transition: transform 0.3s; /* Smooth scaling effect */
-}
-.non_collected_items:hover {
-  transform: scale(1.05); /* Scale up on hover */
-  box-shadow: 0 0 30px rgba(255, 0, 0, 1); /* Stronger aura on hover */
+
+@keyframes shopBgShift {
+    0%, 100% { background-position: 0% 0%; }
+    50% { background-position: 100% 80%; }
 }

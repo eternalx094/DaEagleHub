@@ -49,3 +49,16 @@ class Level(models.Model):
     difficulty = models.CharField(choices=Difficulty.CHOICES, default=Difficulty.N_A, max_length=100)
     duration = models.IntegerField(blank=True, null=True)
     level_data = models.JSONField()
+##############################################################################
+class OnlineLevel(models.Model):
+    name = models.CharField(max_length=80)
+    created_at = models.DateTimeField(auto_now_add=True)
+    creator = models.ForeignKey(Player, on_delete=models.SET_NULL, null=True, blank=True, related_name="online_levels")
+    is_public = models.BooleanField(default=False)
+    plays = models.PositiveIntegerField(default=0)
+    likes = models.PositiveIntegerField(default=0)
+    song_url = models.URLField(blank=True, null=True)
+    level_data = models.JSONField()
+
+    def __str__(self):
+        return self.name

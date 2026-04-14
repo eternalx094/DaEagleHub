@@ -38,12 +38,12 @@ const OBJECT_PALETTE = [
     { label: "Block", tool: "block" },
     { label: "KillBlock", tool: "killblock" },
     { label: "StartLine", tool: "startline" },
+    { label: "FinishLine", tool: "finishline" },
     { label: "Erase", tool: "erase" },
 ];
 
 const TRIGGER_PALETTE = [
     { label: "Rotate", tool: "rotate" },
-    { label: "Spin", tool: "spinaround" },
     { label: "Boost", tool: "boost" },
     { label: "Gravity", tool: "gravity" },
     { label: "Bounce", tool: "bounce" },
@@ -52,17 +52,117 @@ const TRIGGER_PALETTE = [
 const PLACEABLE_OBJECT_TOOLS = new Set(OBJECT_PALETTE.filter(item => item.tool !== "erase").map(item => item.tool));
 const PLACEABLE_TRIGGER_TOOLS = new Set(TRIGGER_PALETTE.map(item => item.tool));
 const TOOL_LABEL_MAP = new Map([...OBJECT_PALETTE, ...TRIGGER_PALETTE].map(item => [item.tool, item.label]));
+const normalizeObjectType = (rawType) => {
+    const t = typeof rawType === "string" ? rawType.trim().toLowerCase() : "block";
+    if (t === "start" || t === "start-line" || t === "start_line") return "startline";
+    if (
+        t === "finish" ||
+        t === "finish-line" ||
+        t === "finish_line" ||
+        t === "end" ||
+        t === "endline" ||
+        t === "end-line" ||
+        t === "end_line"
+    ) {
+        return "finishline";
+    }
+    if (t === "kill" || t === "kill-block" || t === "kill_block" || t === "hazard") return "killblock";
+    return t;
+};
+const normalizeTriggerType = (rawType) => {
+    const t = typeof rawType === "string" ? rawType.trim().toLowerCase() : "bounce";
+    return t === "spinaround" ? "rotate" : t;
+};
+const DEFAULT_LEVEL_SPEED = 1.0;
+const MIN_LEVEL_SPEED = 2;
+const MAX_LEVEL_SPEED = 12;
+const clampNumber = (value, min, max) => Math.min(max, Math.max(min, value));
+const sanitizeLevelSpeed = (value, fallback = DEFAULT_LEVEL_SPEED) => {
+    const numeric = Number(value);
+    if (!Number.isFinite(numeric)) return fallback;
+    const clamped = clampNumber(numeric, MIN_LEVEL_SPEED, MAX_LEVEL_SPEED);
+    return Math.round(clamped * 100) / 100;
+};
+const DEFAULT_LEVEL_DURATION_SECONDS = 90;
+const MIN_LEVEL_DURATION_SECONDS = 5;
+const MAX_LEVEL_DURATION_SECONDS = 7200;
+const sanitizeLevelDuration = (value, fallback = DEFAULT_LEVEL_DURATION_SECONDS) => {
+    const numeric = Number(value);
+    if (!Number.isFinite(numeric)) return fallback;
+    const clamped = clampNumber(numeric, MIN_LEVEL_DURATION_SECONDS, MAX_LEVEL_DURATION_SECONDS);
+    return Math.round(clamped);
+};
+const formatDuration = (totalSeconds) => {
+    const safe = Math.max(0, Math.floor(totalSeconds));
+    const minutes = Math.floor(safe / 60);
+    const seconds = safe % 60;
+    return `${minutes}:${String(seconds).padStart(2, "0")}`;
+};
+
+const SAVE_FOLDER_DB_NAME = "sledgepong_editor";
+const SAVE_FOLDER_STORE = "handles";
+const SAVE_FOLDER_KEY = "save_folder";
+const SAVE_SUBFOLDER_NAME = "Sledgepong Levels";
+
+const openHandleDB = () => new Promise((resolve, reject) => {
+    const request = indexedDB.open(SAVE_FOLDER_DB_NAME, 1);
+    request.onupgradeneeded = () => {
+        const db = request.result;
+        if (!db.objectStoreNames.contains(SAVE_FOLDER_STORE)) {
+            db.createObjectStore(SAVE_FOLDER_STORE);
+        }
+    };
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error);
+});
+
+const idbGetHandle = async (key) => {
+    try {
+        const db = await openHandleDB();
+        return await new Promise((resolve) => {
+            const tx = db.transaction(SAVE_FOLDER_STORE, "readonly");
+            const store = tx.objectStore(SAVE_FOLDER_STORE);
+            const req = store.get(key);
+            req.onsuccess = () => resolve(req.result || null);
+            req.onerror = () => resolve(null);
+        });
+    } catch (error) {
+        console.error("Failed to read handle from DB:", error);
+        return null;
+    }
+};
+
+const idbSetHandle = async (key, value) => {
+    try {
+        const db = await openHandleDB();
+        return await new Promise((resolve) => {
+            const tx = db.transaction(SAVE_FOLDER_STORE, "readwrite");
+            const store = tx.objectStore(SAVE_FOLDER_STORE);
+            const req = store.put(value, key);
+            req.onsuccess = () => resolve(true);
+            req.onerror = () => resolve(false);
+        });
+    } catch (error) {
+        console.error("Failed to write handle to DB:", error);
+        return false;
+    }
+};
 
 class Toolbar {
     constructor(editor) {
         this.editor = editor;
         this.width = 220;
-        const objectsTab = new UIElement(20, 20, 90, 30, "Objects", () => this.switch("objects"));
-        objectsTab.tabKey = "objects";
-        objectsTab.active = true;
-        const triggersTab = new UIElement(120, 20, 90, 30, "Triggers", () => this.switch("triggers"));
-        triggersTab.tabKey = "triggers";
-        this.tabs = [objectsTab, triggersTab];
+        const tabDefs = [
+            { key: "objects", label: "Objects" },
+            { key: "triggers", label: "Triggers" },
+            { key: "settings", label: "Settings" },
+        ];
+        this.tabs = tabDefs.map((tab, index) => {
+            const element = new UIElement(8 + index * 68, 20, 66, 30, tab.label, () => this.switch(tab.key));
+            element.tabKey = tab.key;
+            element.active = tab.key === "objects";
+            return element;
+        });
         this.buttons = [];
         this.utilities = [];
         this.activeTab = "objects";
@@ -71,7 +171,12 @@ class Toolbar {
     }
 
     #setupButtons() {
-        const palette = this.activeTab === "objects" ? OBJECT_PALETTE : TRIGGER_PALETTE;
+        let palette = [];
+        if (this.activeTab === "objects") {
+            palette = OBJECT_PALETTE;
+        } else if (this.activeTab === "triggers") {
+            palette = TRIGGER_PALETTE;
+        }
         this.buttons = palette.map((item, index) => {
             const column = index % 2;
             const row = Math.floor(index / 2);
@@ -105,23 +210,32 @@ class Toolbar {
         for (let b of this.buttons)
             if (b.contains(x, y)) return b.action();
 
+        if (this.activeTab !== "settings") return;
         for (let u of this.utilities)
             if (u.contains(x, y)) return u.action();
     }
 
     handleHover(x, y) {
-        for (let e of [...this.tabs, ...this.buttons, ...this.utilities])
+        const interactive = this.activeTab === "settings"
+            ? [...this.tabs, ...this.buttons, ...this.utilities]
+            : [...this.tabs, ...this.buttons];
+        for (let e of interactive)
             e.hovered = e.contains(x, y);
     }
     onResize() {
         const canvasHeight = this.editor.canvas.height;
-        const baseY = Math.max(canvasHeight - 210, 260);
         const actions = [
             { label: "Test Level", handler: () => this.editor.testLevel() },
             { label: "Save Level", handler: () => this.editor.saveLevel() },
+            { label: this.editor.getSaveFolderLabel(), handler: () => this.editor.promptSaveFolder() },
             { label: "Load Level", handler: () => this.editor.promptLoadLevel() },
+            { label: `AutoSnap: ${this.editor.autoSnap ? "On" : "Off"}`, handler: () => this.editor.toggleAutoSnap() },
+            { label: "Level Speed", handler: () => this.editor.promptLevelSpeed() },
+            { label: "Level Time", handler: () => this.editor.promptLevelDuration() },
             { label: "Clear Level", handler: () => this.editor.clearEntities() },
         ];
+        const panelHeight = actions.length * 50;
+        const baseY = Math.max(canvasHeight - panelHeight - 24, 230);
         this.utilities = actions.map((item, index) => {
             const util = new UIElement(20, baseY + index * 50, 180, 40, item.label, item.handler);
             util.tool = null;
@@ -144,9 +258,11 @@ class Toolbar {
             b.active = b.tool === activeTool;
             b.draw(ctx);
         }
-        for (let u of this.utilities) {
-            u.active = false;
-            u.draw(ctx);
+        if (this.activeTab === "settings") {
+            for (let u of this.utilities) {
+                u.active = false;
+                u.draw(ctx);
+            }
         }
     }
 }
@@ -168,16 +284,53 @@ class GameObject extends Entity {
 
     draw(ctx) {
         ctx.save();
-        ctx.fillStyle = "cornflowerblue";
-        ctx.fillRect(this.x, this.y, this.size, this.size);
         if (this.type === "killblock") {
-            this.#drawKillIcon(ctx);
+            this.#drawKillHazard(ctx);
+        } else if (this.type === "startline") {
+            const startGradient = ctx.createLinearGradient(this.x, this.y, this.x + this.size, this.y);
+            startGradient.addColorStop(0, "#1abec6");
+            startGradient.addColorStop(1, "#0b6472");
+            ctx.fillStyle = startGradient;
+            ctx.fillRect(this.x, this.y, this.size, this.size);
+            ctx.strokeStyle = "rgba(235, 248, 255, 0.65)";
+            ctx.lineWidth = 1.4;
+            ctx.strokeRect(this.x + 0.5, this.y + 0.5, this.size - 1, this.size - 1);
+            this.#drawStartIcon(ctx);
+        } else if (this.type === "finishline") {
+            this.#drawFinishMarker(ctx);
+            this.#drawFinishIcon(ctx);
+        } else {
+            const blockGradient = ctx.createLinearGradient(this.x, this.y, this.x, this.y + this.size);
+            blockGradient.addColorStop(0, "#66b9ff");
+            blockGradient.addColorStop(1, "#2a45cc");
+            ctx.fillStyle = blockGradient;
+            ctx.fillRect(this.x, this.y, this.size, this.size);
+            ctx.strokeStyle = "rgba(235, 248, 255, 0.65)";
+            ctx.lineWidth = 1.4;
+            ctx.strokeRect(this.x + 0.5, this.y + 0.5, this.size - 1, this.size - 1);
         }
         if (this.selected) {
             ctx.strokeStyle = "white";
             ctx.lineWidth = 2;
             ctx.strokeRect(this.x, this.y, this.size, this.size);
         }
+        ctx.restore();
+    }
+
+    #drawKillHazard(ctx) {
+        const centerX = this.x + this.size / 2;
+        const centerY = this.y + this.size / 2;
+        const radius = this.size * 0.42;
+        ctx.save();
+        ctx.shadowColor = "rgba(255, 80, 80, 0.9)";
+        ctx.shadowBlur = 12;
+        ctx.strokeStyle = "rgba(255, 112, 112, 0.95)";
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.shadowBlur = 0;
+        this.#drawKillIcon(ctx);
         ctx.restore();
     }
 
@@ -235,6 +388,76 @@ class GameObject extends Entity {
         ctx.restore();
     }
 
+    #drawStartIcon(ctx) {
+        const centerX = this.x + this.size / 2;
+        ctx.save();
+        ctx.strokeStyle = "rgba(225, 255, 250, 0.95)";
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        ctx.moveTo(centerX, this.y + 6);
+        ctx.lineTo(centerX, this.y + this.size - 6);
+        ctx.stroke();
+
+        ctx.fillStyle = "rgba(225, 255, 250, 0.95)";
+        ctx.beginPath();
+        ctx.moveTo(centerX + 8, this.y + this.size / 2);
+        ctx.lineTo(centerX - 2, this.y + this.size / 2 - 7);
+        ctx.lineTo(centerX - 2, this.y + this.size / 2 + 7);
+        ctx.closePath();
+        ctx.fill();
+        ctx.restore();
+    }
+
+    #drawFinishIcon(ctx) {
+        const poleX = this.x + this.size * 0.34;
+        const topY = this.y + 6;
+        const bottomY = this.y + this.size - 6;
+        const flagTop = this.y + this.size * 0.28;
+        const flagBottom = this.y + this.size * 0.72;
+        const flagWidth = this.size * 0.36;
+
+        ctx.save();
+        ctx.strokeStyle = "rgba(255, 250, 230, 0.95)";
+        ctx.lineWidth = 2.3;
+        ctx.beginPath();
+        ctx.moveTo(poleX, topY);
+        ctx.lineTo(poleX, bottomY);
+        ctx.stroke();
+
+        const cols = 2;
+        const rows = 2;
+        const cellW = flagWidth / cols;
+        const cellH = (flagBottom - flagTop) / rows;
+        for (let row = 0; row < rows; row++) {
+            for (let col = 0; col < cols; col++) {
+                const dark = (row + col) % 2 === 0;
+                ctx.fillStyle = dark ? "rgba(18, 22, 28, 0.9)" : "rgba(245, 245, 245, 0.95)";
+                ctx.fillRect(poleX + col * cellW, flagTop + row * cellH, cellW, cellH);
+            }
+        }
+        ctx.strokeStyle = "rgba(255, 250, 230, 0.9)";
+        ctx.lineWidth = 1.2;
+        ctx.strokeRect(poleX, flagTop, flagWidth, flagBottom - flagTop);
+        ctx.restore();
+    }
+
+    #drawFinishMarker(ctx) {
+        const beamWidth = Math.max(4, this.size * 0.2);
+        const beamX = this.x + this.size * 0.3;
+        const top = this.y - this.size * 0.2;
+        const bottom = this.y + this.size * 1.2;
+        ctx.save();
+        ctx.shadowColor = "rgba(255, 225, 120, 0.9)";
+        ctx.shadowBlur = 10;
+        ctx.fillStyle = "rgba(255, 220, 92, 0.85)";
+        ctx.fillRect(beamX, top, beamWidth, bottom - top);
+        ctx.shadowBlur = 0;
+        ctx.strokeStyle = "rgba(255, 246, 210, 0.95)";
+        ctx.lineWidth = 1.8;
+        ctx.strokeRect(beamX, this.y, beamWidth, this.size);
+        ctx.restore();
+    }
+
     contains(x, y) {
         return x >= this.x && x <= this.x + this.size &&
             y >= this.y && y <= this.y + this.size;
@@ -253,7 +476,6 @@ class GameObject extends Entity {
 
 const TRIGGER_COLORS = {
     rotate: "#FFA500",
-    spinaround: "#8A2BE2",
     boost: "#00CED1",
     gravity: "#FF1493",
     bounce: "#7CFC00"
@@ -323,14 +545,25 @@ class Editor {
         this.dragging = false;
         this.selectedEntity = null;
         this.gridSize = 40;
+        this.autoSnap = true;
+        this.levelSpeed = DEFAULT_LEVEL_SPEED;
+        this.levelDurationSeconds = DEFAULT_LEVEL_DURATION_SECONDS;
+        this.viewX = 0;
+        this.isPanning = false;
+        this.panStartClientX = 0;
+        this.panStartViewX = 0;
+        this.dragOffsetX = 0;
+        this.dragOffsetY = 0;
         this.message = null;
         this.messageExpires = 0;
         this.fileInput = this.#createFileInput();
+        this.saveFolderHandle = null;
 
         this.resize();
         window.addEventListener("resize", () => this.resize());
         this.setTool("block", TOOL_LABEL_MAP.get("block"));
         this.#bindEvents();
+        this.#loadSaveFolderHandle();
         this.loop();
     }
 
@@ -355,36 +588,41 @@ class Editor {
         this.#setMessage(text);
     }
 
-    testLevel() {
-       const level = this.saveLevel()
-       localStorage.setItem("sledgepong_current_level", level)
-        window.open("http://127.0.0.1:8000/sledgepong/playpage/levels/game", "_blank");
+    async testLevel() {
+        const level = await this.saveLevel();
+        if (!level) return;
+        localStorage.setItem("sledgepong_current_level", level);
+        window.open("/sledgepong/playpage/levels/game", "_blank");
     }
-    saveLevel() {
+    async saveLevel() {
         const serializedEntities = this.entities
             .map(entity => (typeof entity.serialize === "function" ? entity.serialize() : null))
             .filter(Boolean);
         
         if (serializedEntities.length === 0) {
             this.showMessage("Cannot save empty level");
-            return;
+            return null;
         }
 
-        const levelName = prompt("Enter level name:", `Level ${Date.now()}`);
+        const levelNameRaw = prompt("Enter level name:", `Level ${Date.now()}`);
+        const levelName = levelNameRaw ? levelNameRaw.trim() : "";
         if (!levelName) {
             this.showMessage("Save cancelled");
-            return;
+            return null;
         }
 
         const levelData = {
             name: levelName,
             version: 1,
             gridSize: this.gridSize,
+            baseSpeed: this.levelSpeed,
+            durationSeconds: this.levelDurationSeconds,
             entities: serializedEntities,
             timestamp: Date.now()
         };
 
         // Save to localStorage for levels page
+        let savedToBrowser = false;
         try {
             let savedLevels = [];
             const saved = localStorage.getItem("sledgepong_levels");
@@ -394,29 +632,138 @@ class Editor {
             savedLevels.push(levelData);
             localStorage.setItem("sledgepong_levels", JSON.stringify(savedLevels));
             localStorage.setItem("sledgepong_recent_level", JSON.stringify(levelData));
-            this.showMessage(`Level "${levelName}" saved!`);
+            savedToBrowser = true;
         } catch (e) {
             console.error("Failed to save to localStorage:", e);
-            this.showMessage("Failed to save to browser storage");
         }
 
-        // Also download as JSON file
-        const blob = new Blob([JSON.stringify(levelData, null, 2)], { type: "application/json" });
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement("a");
-        link.href = url;
-        link.download = `sledgepong-level-${levelName.replace(/\s+/g, "-")}-${Date.now()}.json`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        URL.revokeObjectURL(url);
-        return JSON.stringify(levelData)
+        const fileStatus = await this.#saveLevelFile(levelData, levelName);
+        if (savedToBrowser && fileStatus === "saved") {
+            this.showMessage(`Level "${levelName}" saved!`);
+        } else if (savedToBrowser) {
+            this.showMessage(`Level "${levelName}" saved to browser storage`);
+        } else if (fileStatus === "saved") {
+            this.showMessage(`Level "${levelName}" saved to file`);
+        } else if (fileStatus === "cancelled") {
+            this.showMessage("Save cancelled");
+        } else {
+            this.showMessage("Failed to save level");
+        }
+        return JSON.stringify(levelData);
+    }
+
+    async #saveLevelFile(levelData, levelName) {
+        const payload = JSON.stringify(levelData, null, 2);
+        const safeName = (levelName || "level")
+            .trim()
+            .replace(/\s+/g, "-")
+            .replace(/[^a-zA-Z0-9_-]/g, "");
+        const suggestedName = `sledgepong-level-${safeName || "level"}-${Date.now()}.json`;
+
+        const saveDirHandle = await this.#getSaveDirectoryHandle();
+        if (saveDirHandle) {
+            try {
+                const fileHandle = await saveDirHandle.getFileHandle(suggestedName, { create: true });
+                const writable = await fileHandle.createWritable();
+                await writable.write(payload);
+                await writable.close();
+                return "saved";
+            } catch (error) {
+                console.error("Failed to save into folder:", error);
+            }
+        }
+
+        if (typeof window.showSaveFilePicker === "function") {
+            try {
+                const handle = await window.showSaveFilePicker({
+                    suggestedName,
+                    types: [
+                        {
+                            description: "Sledgepong Level",
+                            accept: { "application/json": [".json"] }
+                        }
+                    ]
+                });
+                const writable = await handle.createWritable();
+                await writable.write(payload);
+                await writable.close();
+                return "saved";
+            } catch (error) {
+                if (error && error.name === "AbortError") {
+                    return "cancelled";
+                }
+                console.error("Failed to save level file:", error);
+                return "failed";
+            }
+        }
+
+        try {
+            const blob = new Blob([payload], { type: "application/json" });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.href = url;
+            link.download = suggestedName;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+            return "saved";
+        } catch (error) {
+            console.error("Failed to download level file:", error);
+            return "failed";
+        }
     }
 
     promptLoadLevel() {
         this.fileInput.value = "";
         this.fileInput.click();
         this.showMessage("Select a level file to load");
+    }
+
+    promptLevelSpeed() {
+        const raw = prompt(
+            `Set level base speed (${MIN_LEVEL_SPEED} - ${MAX_LEVEL_SPEED})`,
+            this.levelSpeed.toFixed(2)
+        );
+        if (raw === null) {
+            this.showMessage("Level speed unchanged");
+            return;
+        }
+        const parsed = Number(raw);
+        if (!Number.isFinite(parsed)) {
+            this.showMessage("Invalid speed value");
+            return;
+        }
+        this.levelSpeed = sanitizeLevelSpeed(parsed, this.levelSpeed);
+        this.showMessage(`Level speed set to ${this.levelSpeed.toFixed(2)}`);
+    }
+
+    promptLevelDuration() {
+        const currentMinutes = Math.floor(this.levelDurationSeconds / 60);
+        const currentSeconds = this.levelDurationSeconds % 60;
+        const minuteRaw = prompt("Set level minutes:", String(currentMinutes));
+        if (minuteRaw === null) {
+            this.showMessage("Level time unchanged");
+            return;
+        }
+        const secondRaw = prompt("Set level seconds (0-59):", String(currentSeconds));
+        if (secondRaw === null) {
+            this.showMessage("Level time unchanged");
+            return;
+        }
+
+        const minutes = Number(minuteRaw);
+        const seconds = Number(secondRaw);
+        if (!Number.isFinite(minutes) || !Number.isFinite(seconds)) {
+            this.showMessage("Invalid level time");
+            return;
+        }
+
+        const safeMinutes = Math.max(0, Math.floor(minutes));
+        const safeSeconds = clampNumber(Math.floor(seconds), 0, 59);
+        const total = safeMinutes * 60 + safeSeconds;
+        this.levelDurationSeconds = sanitizeLevelDuration(total, this.levelDurationSeconds);
+        this.showMessage(`Level time set to ${formatDuration(this.levelDurationSeconds)}`);
     }
 
     clearEntities() {
@@ -433,48 +780,132 @@ class Editor {
         this.toolbar.switch(tab);
     }
 
+    toggleAutoSnap() {
+        this.autoSnap = !this.autoSnap;
+        this.toolbar.onResize();
+        this.showMessage(`AutoSnap ${this.autoSnap ? "enabled" : "disabled"}`);
+    }
+
+    getSaveFolderLabel() {
+        if (!this.saveFolderHandle) return "Save Folder";
+        const name = this.saveFolderHandle.name || "Set";
+        return `Save Folder: ${name}`;
+    }
+
+    async promptSaveFolder() {
+        if (typeof window.showDirectoryPicker !== "function") {
+            this.showMessage("Folder picker not supported");
+            return;
+        }
+        try {
+            const handle = await window.showDirectoryPicker();
+            this.saveFolderHandle = handle || null;
+            await idbSetHandle(SAVE_FOLDER_KEY, handle);
+            this.toolbar.onResize();
+            const name = handle?.name ? `${handle.name}/${SAVE_SUBFOLDER_NAME}` : SAVE_SUBFOLDER_NAME;
+            this.showMessage(`Save folder set: ${name}`);
+        } catch (error) {
+            if (error && error.name === "AbortError") {
+                this.showMessage("Save folder unchanged");
+                return;
+            }
+            console.error("Failed to set save folder:", error);
+            this.showMessage("Failed to set save folder");
+        }
+    }
+
     #bindEvents() {
         this.canvas.addEventListener("mousedown", (e) => {
             const { x, y } = this.#getMouse(e);
-            if (x < this.toolbar.width) {
+            if (x < this.toolbar.width && e.button === 0) {
                 this.toolbar.handleClick(x, y);
                 return;
             }
-            this.#placeOrSelectEntity(x, y);
+            if (x < this.toolbar.width) return;
+
+            if (e.button === 1) {
+                e.preventDefault();
+                this.isPanning = true;
+                this.panStartClientX = e.clientX;
+                this.panStartViewX = this.viewX;
+                return;
+            }
+
+            if (e.button !== 0) return;
+            const world = this.#toWorld(x, y);
+            this.#placeOrSelectEntity(world.x, world.y);
         });
 
         this.canvas.addEventListener("mousemove", (e) => {
             const { x, y } = this.#getMouse(e);
             this.toolbar.handleHover(x, y);
+
+            if (this.isPanning) {
+                const deltaX = e.clientX - this.panStartClientX;
+                this.viewX = Math.max(0, this.panStartViewX - deltaX);
+                return;
+            }
+
             if (this.dragging && this.selectedEntity) {
-                const snapped = this.#snapToGrid(x, y);
+                const world = this.#toWorld(x, y);
                 if (this.selectedEntity instanceof Trigger) {
-                    const centered = this.#centerOnGrid(snapped);
-                    this.selectedEntity.x = centered.x;
-                    this.selectedEntity.y = centered.y;
+                    const desiredX = world.x - this.dragOffsetX;
+                    const desiredY = world.y - this.dragOffsetY;
+                    if (this.autoSnap) {
+                        const snapped = this.#centerOnGrid(this.#snapToGrid(desiredX - this.gridSize / 2, desiredY - this.gridSize / 2));
+                        this.selectedEntity.x = snapped.x;
+                        this.selectedEntity.y = snapped.y;
+                    } else {
+                        this.selectedEntity.x = desiredX;
+                        this.selectedEntity.y = desiredY;
+                    }
                 } else {
-                    this.selectedEntity.x = snapped.x;
-                    this.selectedEntity.y = snapped.y;
+                    const desiredX = world.x - this.dragOffsetX;
+                    const desiredY = world.y - this.dragOffsetY;
+                    if (this.autoSnap) {
+                        const snapped = this.#snapToGrid(desiredX, desiredY);
+                        this.selectedEntity.x = snapped.x;
+                        this.selectedEntity.y = snapped.y;
+                    } else {
+                        this.selectedEntity.x = desiredX;
+                        this.selectedEntity.y = desiredY;
+                    }
                 }
             }
         });
 
-        this.canvas.addEventListener("mouseup", () => this.dragging = false);
+        this.canvas.addEventListener("mouseup", () => {
+            this.dragging = false;
+            this.isPanning = false;
+        });
         this.canvas.addEventListener("mouseleave", () => {
             this.dragging = false;
+            this.isPanning = false;
             this.toolbar.handleHover(-1, -1);
         });
-        window.addEventListener("mouseup", () => this.dragging = false);
+        window.addEventListener("mouseup", () => {
+            this.dragging = false;
+            this.isPanning = false;
+        });
         window.addEventListener("keydown", (e) => this.#handleKeydown(e));
 
         this.canvas.addEventListener("contextmenu", (e) => {
             e.preventDefault();
             const { x, y } = this.#getMouse(e);
-            const target = this.#findEntityAt(x, y);
+            if (x < this.toolbar.width) return;
+            const world = this.#toWorld(x, y);
+            const target = this.#findEntityAt(world.x, world.y);
             if (target) {
                 this.#removeEntity(target);
             }
         });
+
+        this.canvas.addEventListener("wheel", (e) => {
+            const { x } = this.#getMouse(e);
+            if (x < this.toolbar.width) return;
+            e.preventDefault();
+            this.viewX = Math.max(0, this.viewX + e.deltaY);
+        }, { passive: false });
     }
 
     #handleKeydown(e) {
@@ -531,15 +962,25 @@ class Editor {
             throw new Error("Invalid level data");
         }
         this.gridSize = data.gridSize || this.gridSize;
+        this.levelSpeed = sanitizeLevelSpeed(data.baseSpeed ?? data.speed, DEFAULT_LEVEL_SPEED);
+        this.levelDurationSeconds = sanitizeLevelDuration(
+            data.durationSeconds ?? data.lengthSeconds,
+            DEFAULT_LEVEL_DURATION_SECONDS
+        );
         this.entities = data.entities.map(item => {
-            if (item.category === "trigger" || PLACEABLE_TRIGGER_TOOLS.has(item.type)) {
-                const trigger = new Trigger(item.x, item.y, item.type);
+            const triggerTypeCandidate = normalizeTriggerType(item.type);
+            const objectTypeCandidate = normalizeObjectType(item.type);
+
+            if (item.category === "trigger" || PLACEABLE_TRIGGER_TOOLS.has(triggerTypeCandidate)) {
+                const triggerType = PLACEABLE_TRIGGER_TOOLS.has(triggerTypeCandidate) ? triggerTypeCandidate : "bounce";
+                const trigger = new Trigger(item.x, item.y, triggerType);
                 if (typeof item.radius === "number") {
                     trigger.radius = item.radius;
                 }
                 return trigger;
             }
-            const gameObject = new GameObject(item.x, item.y, item.type ?? "block");
+            const objectType = PLACEABLE_OBJECT_TOOLS.has(objectTypeCandidate) ? objectTypeCandidate : "block";
+            const gameObject = new GameObject(item.x, item.y, objectType);
             if (typeof item.size === "number") {
                 gameObject.size = item.size;
             }
@@ -558,14 +999,55 @@ class Editor {
         return input;
     }
 
+    async #loadSaveFolderHandle() {
+        const handle = await idbGetHandle(SAVE_FOLDER_KEY);
+        if (handle) {
+            this.saveFolderHandle = handle;
+            this.toolbar.onResize();
+        }
+    }
+
+    async #ensureFolderPermission(handle) {
+        if (!handle || typeof handle.queryPermission !== "function") return true;
+        try {
+            const opts = { mode: "readwrite" };
+            const status = await handle.queryPermission(opts);
+            if (status === "granted") return true;
+            const requested = await handle.requestPermission(opts);
+            return requested === "granted";
+        } catch (error) {
+            console.error("Failed to request folder permission:", error);
+            return false;
+        }
+    }
+
+    async #getSaveDirectoryHandle() {
+        if (!this.saveFolderHandle) return null;
+        const hasPermission = await this.#ensureFolderPermission(this.saveFolderHandle);
+        if (!hasPermission) return null;
+        try {
+            return await this.saveFolderHandle.getDirectoryHandle(SAVE_SUBFOLDER_NAME, { create: true });
+        } catch (error) {
+            console.error("Failed to access save subfolder:", error);
+            return null;
+        }
+    }
+
     #getMouse(e) {
         const rect = this.canvas.getBoundingClientRect();
         return { x: e.clientX - rect.left, y: e.clientY - rect.top };
     }
 
+    #toWorld(screenX, screenY) {
+        return {
+            x: screenX + this.viewX,
+            y: screenY
+        };
+    }
+
     #snapToGrid(x, y) {
-        const gx = Math.floor((x - this.toolbar.width) / this.gridSize) * this.gridSize + this.toolbar.width;
-        const gy = Math.floor(y / this.gridSize) * this.gridSize;
+        const gx = Math.round(x / this.gridSize) * this.gridSize;
+        const gy = Math.round(y / this.gridSize) * this.gridSize;
         return { x: gx, y: gy };
     }
 
@@ -583,6 +1065,8 @@ class Editor {
                 this.#removeEntity(target);
                 return;
             }
+            this.dragOffsetX = x - target.x;
+            this.dragOffsetY = y - target.y;
             this.#selectEntity(target, { startDragging: true });
             return;
         }
@@ -593,20 +1077,27 @@ class Editor {
             return;
         }
 
-        const snapped = this.#snapToGrid(x, y);
-
         if (PLACEABLE_OBJECT_TOOLS.has(this.currentTool)) {
-            const object = new GameObject(snapped.x, snapped.y, this.currentTool);
+            const topLeft = this.autoSnap
+                ? this.#snapToGrid(x - this.gridSize / 2, y - this.gridSize / 2)
+                : { x: x - this.gridSize / 2, y: y - this.gridSize / 2 };
+            const object = new GameObject(topLeft.x, topLeft.y, this.currentTool);
             this.entities.push(object);
+            this.dragOffsetX = object.size / 2;
+            this.dragOffsetY = object.size / 2;
             this.#selectEntity(object, { silent: true });
             this.showMessage(`${this.#toolLabel(this.currentTool)} placed`);
             return;
         }
 
         if (PLACEABLE_TRIGGER_TOOLS.has(this.currentTool)) {
-            const centered = this.#centerOnGrid(snapped);
-            const trigger = new Trigger(centered.x, centered.y, this.currentTool);
+            const center = this.autoSnap
+                ? this.#centerOnGrid(this.#snapToGrid(x - this.gridSize / 2, y - this.gridSize / 2))
+                : { x, y };
+            const trigger = new Trigger(center.x, center.y, this.currentTool);
             this.entities.push(trigger);
+            this.dragOffsetX = 0;
+            this.dragOffsetY = 0;
             this.#selectEntity(trigger, { silent: true });
             this.showMessage(`${this.#toolLabel(this.currentTool)} trigger placed`);
             return;
@@ -642,6 +1133,8 @@ class Editor {
         }
         this.selectedEntity = null;
         this.dragging = false;
+        this.dragOffsetX = 0;
+        this.dragOffsetY = 0;
         if (!silent) {
             this.showMessage("Selection cleared");
         }
@@ -654,6 +1147,8 @@ class Editor {
         if (this.selectedEntity === entity) {
             this.selectedEntity = null;
             this.dragging = false;
+            this.dragOffsetX = 0;
+            this.dragOffsetY = 0;
         }
         if (!silent) {
             const suffix = entity instanceof Trigger ? " trigger removed" : " removed";
@@ -672,17 +1167,43 @@ class Editor {
 
     drawGrid() {
         const { ctx, gridSize } = this;
+        const worldLeft = this.viewX + this.toolbar.width;
+        const worldRight = this.viewX + this.canvas.width;
+        const firstX = Math.floor(worldLeft / gridSize) * gridSize;
         ctx.strokeStyle = "rgba(255,255,255,0.1)";
         ctx.beginPath();
         for (let y = 0; y <= this.canvas.height; y += gridSize) {
-            ctx.moveTo(this.toolbar.width, y);
-            ctx.lineTo(this.canvas.width, y);
+            ctx.moveTo(worldLeft, y);
+            ctx.lineTo(worldRight, y);
         }
-        for (let x = this.toolbar.width; x <= this.canvas.width; x += gridSize) {
+        for (let x = firstX; x <= worldRight; x += gridSize) {
             ctx.moveTo(x, 0);
             ctx.lineTo(x, this.canvas.height);
         }
         ctx.stroke();
+    }
+
+    #drawStatus() {
+        const ctx = this.ctx;
+        const x = this.toolbar.width + 20;
+        const y = this.canvas.height - 40;
+        const width = 460;
+        const height = 26;
+        ctx.save();
+        ctx.fillStyle = "rgba(8, 15, 38, 0.72)";
+        ctx.fillRect(x, y, width, height);
+        ctx.strokeStyle = "rgba(110, 176, 235, 0.7)";
+        ctx.strokeRect(x, y, width, height);
+        ctx.fillStyle = "#f6fbff";
+        ctx.font = "17px 'Jersey 15', Arial";
+        ctx.textAlign = "left";
+        ctx.textBaseline = "middle";
+        ctx.fillText(
+            `Snap ${this.autoSnap ? "On" : "Off"}  Speed ${this.levelSpeed.toFixed(2)}  Length ${formatDuration(this.levelDurationSeconds)}  X ${Math.round(this.viewX)}`,
+            x + 12,
+            y + height / 2
+        );
+        ctx.restore();
     }
 
     #drawOverlay() {
@@ -715,8 +1236,15 @@ class Editor {
     draw() {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
         this.toolbar.draw(this.ctx);
+        this.ctx.save();
+        this.ctx.beginPath();
+        this.ctx.rect(this.toolbar.width, 0, this.canvas.width - this.toolbar.width, this.canvas.height);
+        this.ctx.clip();
+        this.ctx.translate(-this.viewX, 0);
         this.drawGrid();
         for (const entity of this.entities) entity.draw(this.ctx);
+        this.ctx.restore();
+        this.#drawStatus();
         this.#drawOverlay();
     }
 

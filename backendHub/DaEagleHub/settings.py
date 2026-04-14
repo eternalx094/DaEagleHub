@@ -125,6 +125,9 @@ STATIC_URL = "/static/"
 #    BASE_DIR / "static",
 #]
 STATIC_ROOT = BASE_DIR / "static"
+
+# Dev-friendly email backend for password reset
+EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 

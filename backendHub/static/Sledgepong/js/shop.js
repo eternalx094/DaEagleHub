@@ -40,7 +40,7 @@ async function buyTexture(textureId, textureName, itemElement) {
 
         // Make request to Django buy endpoint
         const response = await fetch(`buy/${textureId}/`, {
-            method: 'GET',
+            method: 'POST',
             headers: {
                 'X-CSRFToken': csrfToken,
             }

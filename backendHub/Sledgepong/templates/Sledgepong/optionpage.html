@@ -1,23 +1,56 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <link rel="stylesheet" type="text/css" href="mainmenu.css">
+    <meta charset="UTF-8">
     <title>Options - Sledgepong</title>
+    <link rel="stylesheet" href="{% static 'Sledgepong/css/options.css' %}?v=galaxy1">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Jersey+15&display=swap" rel="stylesheet">
 </head>
 <body>
-    <div id="optionsModal" class="modal">
-        <button id="backButton">Back</button>
-        <div class="modal-content">
-            <h2>Game Options</h2>
-            
-            <label for="speedControl">Ball Speed:</label>
-            <input type="range" id="speedControl" min="1" max="10" value="5">
-            
-            <label for="aiControl">AI Difficulty:</label>
-            <input type="range" id="aiControl" min="1" max="10" value="5">
+    <a id="backButton" class="back-button" href="{% url 'Sledgepong' %}">Back</a>
+    <div class="options-card">
+        <h1 class="options-title">Game Options</h1>
+
+        <div class="option-group">
+            <label for="optVolume">Volume</label>
+            <div class="slider-row">
+                <input id="optVolume" type="range" min="0" max="100" value="80">
+                <span id="optVolumeValue">80%</span>
+            </div>
         </div>
+
+        <div class="option-group">
+            <label for="optRefresh">Refresh Rate</label>
+            <select id="optRefresh">
+                <option value="30">30 Hz</option>
+                <option value="60">60 Hz</option>
+                <option value="120">120 Hz</option>
+                <option value="144">144 Hz</option>
+                <option value="240">240 Hz</option>
+            </select>
+        </div>
+
+        <div class="option-group">
+            <label for="optGraphics">Graphics</label>
+            <select id="optGraphics">
+                <option value="low">Low</option>
+                <option value="medium">Medium</option>
+                <option value="high">High</option>
+                <option value="ultra">Ultra</option>
+            </select>
+        </div>
+
+        <div class="option-group toggle-row">
+            <label for="optLdm">LDM (Low Detail Mode)</label>
+            <input id="optLdm" type="checkbox">
+        </div>
+
+        <p class="options-hint">Settings save automatically.</p>
     </div>
 
-    <script src="optionpage.js"></script>
+    <script src="{% static 'Sledgepong/js/options.js' %}?v=galaxy1"></script>
 </body>
 </html>

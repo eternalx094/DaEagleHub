@@ -4,27 +4,30 @@
 <head>
     <meta charset="UTF-8">
     <title>Sledgepong Levels</title>
-    <link rel="stylesheet" href="{% static 'Sledgepong/css/levels.css' %}">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='40' fill='%239fd6ff'/%3E%3Ccircle cx='50' cy='50' r='20' fill='%235a7bff'/%3E%3C/svg%3E">
+    <link rel="stylesheet" href="{% static 'Sledgepong/css/levels.css' %}?v=galaxy2">
 </head>
-<body>
+<body class="levels-home">
     <a id="backButton" class="back-button" href="{% url 'playpage' %}">Back</a>
-    <h1 class="title">Select a Level</h1>
+    <h1 class="title">Levels</h1>
+    <p class="subtitle">Choose your path through the Sledgepong galaxy.</p>
 
-    <div class="levels-container">
-        <div class="section">
+    <div class="levels-home-grid">
+        <a class="level-card" href="{% url 'levels-original' %}">
             <h2>Original Levels</h2>
-            <div id="originalLevels" class="level-list">
-                <!-- Original levels will appear here -->
-            </div>
-        </div>
-        <div class="section">
-            <h2>Saved Levels</h2>
-            <div id="savedLevels" class="level-list">
-                <!-- Saved levels will appear here -->
-            </div>
-        </div>
+            <p>Official campaign levels forged by the core team.</p>
+            <span class="card-tag">Campaign</span>
+        </a>
+        <a class="level-card" href="{% url 'levels-online' %}">
+            <h2>Online Levels</h2>
+            <p>Explore public creations shared by the community.</p>
+            <span class="card-tag">Online</span>
+        </a>
+        <a class="level-card" href="{% url 'levels-mine' %}">
+            <h2>Your Levels</h2>
+            <p>Your saved drafts and published creations.</p>
+            <span class="card-tag">Creator</span>
+        </a>
     </div>
-
-    <script src="{% static 'Sledgepong/js/levels.js' %}"></script>
 </body>
 </html>

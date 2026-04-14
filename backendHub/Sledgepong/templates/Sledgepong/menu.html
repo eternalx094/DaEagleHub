@@ -2,19 +2,19 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <link rel="stylesheet" href="{% static 'Sledgepong/css/menu.css' %}">
+    <link rel="stylesheet" href="{% static 'Sledgepong/css/menu.css' %}?v=galaxy1">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Jersey+15&display=swap" rel="stylesheet">
     <title>Sledgepong</title>
 </head>
 <body>
+    <a id="backButton" href="{% url 'hub_view' %}">Back to Hub</a>
     <div class="modal">
-        <a id="backButton" href="{% url 'hub_view' %}">Back to Hub</a>
         <div class="lobby">
             <h1 class="main-title">Sledgepong</h1>
             <a class="btns" href="{% url 'playpage' %}">Play</a>
-            <a class="btns" href="{% url 'playpage' %}">Options</a>
+            <a class="btns" href="{% url 'options' %}">Options</a>
             <a class="btns" href="{% url 'shop' %}">Shop</a>
         </div>
     </div>

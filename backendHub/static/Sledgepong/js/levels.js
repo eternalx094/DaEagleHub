@@ -1,22 +1,26 @@
 document.addEventListener("DOMContentLoaded", () => {
-    const originalLevels = document.getElementById("originalLevels");
-    const savedLevels = document.getElementById("savedLevels");
-    
-    // Original levels section - empty for now
-    const emptyOriginal = document.createElement("p");
-    emptyOriginal.textContent = "No original levels available yet.";
-    emptyOriginal.style.opacity = 0.7;
-    originalLevels.appendChild(emptyOriginal);
-    
-    // Load saved levels from localStorage
+    const localLevels = document.getElementById("localLevels");
+    const publishedLevels = document.getElementById("publishedLevels");
+    const publishedDataElement = document.getElementById("publishedLevelsData");
+    let publishedLevelsData = [];
+
+    if (publishedDataElement) {
+        try {
+            publishedLevelsData = JSON.parse(publishedDataElement.textContent || "[]");
+        } catch (error) {
+            console.error("Failed to parse published levels:", error);
+        }
+    }
+
+    // Load local saved levels from localStorage
     let savedLevelsData = [];
     try {
         const saved = localStorage.getItem("sledgepong_levels");
         if (saved) {
             savedLevelsData = JSON.parse(saved);
         }
-    } catch (e) {
-        console.error("Failed to load saved levels:", e);
+    } catch (error) {
+        console.error("Failed to load saved levels:", error);
         savedLevelsData = [];
     }
 
@@ -33,29 +37,61 @@ document.addEventListener("DOMContentLoaded", () => {
                 });
             }
         }
-    } catch (e) {
-        console.error("Failed to load recent level:", e);
+    } catch (error) {
+        console.error("Failed to load recent level:", error);
     }
 
     if (savedLevelsData.length > 0) {
         savedLevelsData.forEach((level, index) => {
             const btn = document.createElement("button");
-            btn.textContent = level.name || `Level ${index + 1}`;
             btn.className = "level-item";
-            btn.onclick = () => {
-                // Save level data to localStorage for game to load
+            btn.textContent = level.name || `Level ${index + 1}`;
+            btn.addEventListener("click", () => {
                 const levelData = level.data || level;
                 localStorage.setItem("sledgepong_current_level", JSON.stringify(levelData));
-                
-                // Navigate to game
-                window.location.href = `http://127.0.0.1:8000/sledgepong/playpage/levels/game`;
-            };
-            savedLevels.appendChild(btn);
+                window.location.href = "/sledgepong/playpage/levels/game";
+            });
+            localLevels.appendChild(btn);
         });
     } else {
         const empty = document.createElement("p");
-        empty.textContent = "No saved levels yet. Create one in the editor!";
+        empty.textContent = "No local levels yet. Create one in the editor!";
         empty.style.opacity = 0.7;
-        savedLevels.appendChild(empty);
+        localLevels.appendChild(empty);
+    }
+
+    if (publishedLevelsData.length > 0) {
+        publishedLevelsData.forEach((level, index) => {
+            const btn = document.createElement("button");
+            btn.className = "level-item level-item--detail";
+
+            const name = document.createElement("div");
+            name.className = "level-name";
+            name.textContent = level.name || `Level ${index + 1}`;
+
+            const meta = document.createElement("div");
+            meta.className = "level-meta";
+            const parts = [];
+            if (level.created_at) parts.push(`Created: ${level.created_at}`);
+            if (typeof level.plays === "number") parts.push(`Plays: ${level.plays}`);
+            if (typeof level.likes === "number") parts.push(`Likes: ${level.likes}`);
+            if (level.is_public === false) parts.push("Private");
+            meta.textContent = parts.length > 0 ? parts.join(" • ") : "Published level";
+
+            btn.appendChild(name);
+            btn.appendChild(meta);
+
+            btn.addEventListener("click", () => {
+                localStorage.setItem("sledgepong_current_level", JSON.stringify(level.data));
+                window.location.href = "/sledgepong/playpage/levels/game";
+            });
+
+            publishedLevels.appendChild(btn);
+        });
+    } else {
+        const empty = document.createElement("p");
+        empty.textContent = "No published levels yet.";
+        empty.style.opacity = 0.7;
+        publishedLevels.appendChild(empty);
     }
 });

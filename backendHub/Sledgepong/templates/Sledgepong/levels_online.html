@@ -1,0 +1,24 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Online Levels</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='40' fill='%239fd6ff'/%3E%3Ccircle cx='50' cy='50' r='20' fill='%235a7bff'/%3E%3C/svg%3E">
+    <link rel="stylesheet" href="{% static 'Sledgepong/css/levels.css' %}?v=galaxy2">
+</head>
+<body class="levels-list">
+    <a id="backButton" class="back-button" href="{% url 'levels' %}">Back</a>
+    <h1 class="title">Online Levels</h1>
+    <p class="subtitle">Public levels from the community.</p>
+
+    <div class="levels-panel">
+        <div id="onlineLevels" class="level-list">
+            <!-- Online levels render here -->
+        </div>
+    </div>
+
+    {{ levels_payload|json_script:"onlineLevelsData" }}
+    <script src="{% static 'Sledgepong/js/levels_online.js' %}?v=galaxy2"></script>
+</body>
+</html>
