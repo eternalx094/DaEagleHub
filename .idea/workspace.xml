@@ -6,30 +6,14 @@
   <component name="ChangeListManager">
     <list default="true" id="bfb72f5d-6159-44d8-95f3-55196568f59b" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backendHub/DaEagleHub/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/backendHub/DaEagleHub/settings.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backendHub/DaHub/templates/DaHub/login.html" beforeDir="false" afterPath="$PROJECT_DIR$/backendHub/DaHub/templates/DaHub/login.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backendHub/DaHub/tests.py" beforeDir="false" afterPath="$PROJECT_DIR$/backendHub/DaHub/tests.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backendHub/DaHub/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/backendHub/DaHub/urls.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backendHub/Sledgepong/admin.py" beforeDir="false" afterPath="$PROJECT_DIR$/backendHub/Sledgepong/admin.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backendHub/Sledgepong/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/backendHub/Sledgepong/models.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backendHub/Sledgepong/templates/Sledgepong/editor.html" beforeDir="false" afterPath="$PROJECT_DIR$/backendHub/Sledgepong/templates/Sledgepong/editor.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backendHub/Sledgepong/templates/Sledgepong/game.html" beforeDir="false" afterPath="$PROJECT_DIR$/backendHub/Sledgepong/templates/Sledgepong/game.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backendHub/Sledgepong/templates/Sledgepong/levels.html" beforeDir="false" afterPath="$PROJECT_DIR$/backendHub/Sledgepong/templates/Sledgepong/levels.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backendHub/Sledgepong/templates/Sledgepong/menu.html" beforeDir="false" afterPath="$PROJECT_DIR$/backendHub/Sledgepong/templates/Sledgepong/menu.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backendHub/Sledgepong/templates/Sledgepong/optionpage.html" beforeDir="false" afterPath="$PROJECT_DIR$/backendHub/Sledgepong/templates/Sledgepong/optionpage.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backendHub/Sledgepong/templates/Sledgepong/shop.html" beforeDir="false" afterPath="$PROJECT_DIR$/backendHub/Sledgepong/templates/Sledgepong/shop.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backendHub/Sledgepong/tests.py" beforeDir="false" afterPath="$PROJECT_DIR$/backendHub/Sledgepong/tests.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backendHub/Sledgepong/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/backendHub/Sledgepong/urls.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backendHub/Sledgepong/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/backendHub/Sledgepong/views.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backendHub/static/Sledgepong/css/editor.css" beforeDir="false" afterPath="$PROJECT_DIR$/backendHub/static/Sledgepong/css/editor.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backendHub/static/Sledgepong/css/game.css" beforeDir="false" afterPath="$PROJECT_DIR$/backendHub/static/Sledgepong/css/game.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backendHub/static/Sledgepong/css/levels.css" beforeDir="false" afterPath="$PROJECT_DIR$/backendHub/static/Sledgepong/css/levels.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backendHub/static/Sledgepong/css/menu.css" beforeDir="false" afterPath="$PROJECT_DIR$/backendHub/static/Sledgepong/css/menu.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backendHub/static/Sledgepong/css/shop.css" beforeDir="false" afterPath="$PROJECT_DIR$/backendHub/static/Sledgepong/css/shop.css" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backendHub/static/Sledgepong/js/editor.js" beforeDir="false" afterPath="$PROJECT_DIR$/backendHub/static/Sledgepong/js/editor.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backendHub/static/Sledgepong/js/game.js" beforeDir="false" afterPath="$PROJECT_DIR$/backendHub/static/Sledgepong/js/game.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backendHub/static/Sledgepong/js/levels.js" beforeDir="false" afterPath="$PROJECT_DIR$/backendHub/static/Sledgepong/js/levels.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backendHub/static/Sledgepong/js/shop.js" beforeDir="false" afterPath="$PROJECT_DIR$/backendHub/static/Sledgepong/js/shop.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docker-compose.yml" beforeDir="false" afterPath="$PROJECT_DIR$/docker-compose.yml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -50,6 +34,18 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
+  <component name="GitHubPullRequestSearchHistory"><![CDATA[{
+  "lastFilter": {
+    "state": "OPEN",
+    "assignee": "eternalx094"
+  }
+}]]></component>
+  <component name="GithubPullRequestsUISettings"><![CDATA[{
+  "selectedUrlAndAccountId": {
+    "url": "https://github.com/eternalx094/DaEagleHub.git",
+    "accountId": "a995e642-b25d-465a-a59a-de0901cbfabb"
+  }
+}]]></component>
   <component name="HighlightingSettingsPerFile">
     <setting file="file://$PROJECT_DIR$/backendHub/DaHub/templates/DaHub/DaHub.html" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/backendHub/Sledgepong/templates/Sledgepong/shop.html" root0="FORCE_HIGHLIGHTING" />

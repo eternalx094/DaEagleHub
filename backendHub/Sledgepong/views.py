@@ -1,4 +1,5 @@
-from django.http import HttpResponse, HttpResponseNotAllowed
+import json
+from django.http import HttpResponse, HttpResponseNotAllowed, JsonResponse
 from django.shortcuts import render
 from .models import Texture, Player, Level, OnlineLevel
 ############################################################################################################### <-- this is a divider
@@ -83,7 +84,86 @@ def shop_equip_view(request, texture_id):
 ################################################################################################################ <-- this is a divider
 def editor_view(request):
     if request.method == 'GET':
-        return render(request, 'Sledgepong/editor.html')
+        return render(request, 'Sledgepong/editor.html', {
+            'is_superuser': request.user.is_superuser,
+        })
+############################################################################################################### <-- this is a divider
+def editor_save_view(request):
+    if request.method != 'POST':
+        return HttpResponseNotAllowed(['POST'])
+
+    if not request.user.is_authenticated:
+        return HttpResponse('Login required', status=401)
+
+    content_type = request.META.get('CONTENT_TYPE', '')
+    song_file = None
+    if content_type.startswith('multipart/form-data'):
+        name = (request.POST.get('name') or '').strip()
+        song_url = (request.POST.get('song_url') or '').strip()
+        visibility = (request.POST.get('visibility') or 'private').strip()
+        level_data_raw = request.POST.get('level_data') or ''
+        try:
+            level_data = json.loads(level_data_raw) if level_data_raw else None
+        except (json.JSONDecodeError, ValueError):
+            return HttpResponse('Invalid level_data JSON', status=400)
+        song_file = request.FILES.get('song_file')
+    else:
+        try:
+            data = json.loads(request.body)
+        except (json.JSONDecodeError, ValueError):
+            return HttpResponse('Invalid JSON', status=400)
+        name = (data.get('name') or '').strip()
+        song_url = (data.get('song_url') or '').strip()
+        visibility = (data.get('visibility') or 'private').strip()
+        level_data = data.get('level_data')
+
+    if not name:
+        return HttpResponse('Level name is required', status=400)
+    if not song_file and not song_url:
+        return HttpResponse('A song file or song URL is required', status=400)
+    if not level_data:
+        return HttpResponse('Level data is required', status=400)
+
+    if visibility not in (OnlineLevel.Visibility.PRIVATE, OnlineLevel.Visibility.ONLINE, OnlineLevel.Visibility.ORIGINAL):
+        visibility = OnlineLevel.Visibility.PRIVATE
+
+    if visibility == OnlineLevel.Visibility.ORIGINAL and not request.user.is_superuser:
+        return HttpResponse('Only superusers can create original levels', status=403)
+
+    player = request.user.sldgpng_player.first()
+    if not player:
+        player = Player.objects.create(user=request.user)
+
+    OnlineLevel.objects.create(
+        name=name,
+        creator=player,
+        visibility=visibility,
+        song_url=song_url or None,
+        song_file=song_file,
+        level_data=level_data,
+    )
+
+    return HttpResponse('Level saved', status=201)
+################################################################################################################ <-- this is a divider
+def editor_list_view(request):
+    if request.method != 'GET':
+        return HttpResponseNotAllowed(['GET'])
+    if not request.user.is_authenticated:
+        return JsonResponse({'levels': []}, status=401)
+    player = request.user.sldgpng_player.first()
+    if not player:
+        return JsonResponse({'levels': []})
+    levels = []
+    for level in OnlineLevel.objects.filter(creator=player).order_by('-created_at'):
+        levels.append({
+            'id': level.id,
+            'name': level.name,
+            'visibility': level.visibility,
+            'song_url': level.get_song_url(),
+            'created_at': level.created_at.strftime('%Y-%m-%d %H:%M'),
+            'level_data': level.level_data,
+        })
+    return JsonResponse({'levels': levels})
 ################################################################################################################ <-- this is a divider
 def levels_view(request):
     if request.method == 'GET':
@@ -91,9 +171,8 @@ def levels_view(request):
 ################################################################################################################ <-- this is a divider
 def levels_original_view(request):
     if request.method == 'GET':
-        levels = Level.objects.all().order_by("id")
         payload = []
-        for level in levels:
+        for level in Level.objects.all().order_by("id"):
             payload.append({
                 "name": level.name,
                 "data": level.level_data,
@@ -101,12 +180,24 @@ def levels_original_view(request):
                 "duration": level.duration,
                 "soundtrack": level.soundtrack,
                 "artist": level.artist,
+                "song_url": None,
+            })
+        for level in OnlineLevel.objects.filter(visibility=OnlineLevel.Visibility.ORIGINAL).order_by("created_at"):
+            creator_name = level.creator.user.username if level.creator and level.creator.user else None
+            payload.append({
+                "name": level.name,
+                "data": level.level_data,
+                "difficulty": None,
+                "duration": level.level_data.get("durationSeconds") if isinstance(level.level_data, dict) else None,
+                "soundtrack": None,
+                "artist": creator_name,
+                "song_url": level.get_song_url(),
             })
         return render(request, 'Sledgepong/levels_original.html', {"levels_payload": payload})
 ################################################################################################################ <-- this is a divider
 def levels_online_view(request):
     if request.method == 'GET':
-        levels = OnlineLevel.objects.filter(is_public=True).order_by("-created_at")
+        levels = OnlineLevel.objects.filter(visibility=OnlineLevel.Visibility.ONLINE).order_by("-created_at")
         payload = []
         for level in levels:
             creator_name = None
@@ -119,7 +210,7 @@ def levels_online_view(request):
                 "created_at": level.created_at.strftime("%Y-%m-%d"),
                 "plays": level.plays,
                 "likes": level.likes,
-                "song_url": level.song_url,
+                "song_url": level.get_song_url(),
             })
         return render(request, 'Sledgepong/levels_online.html', {"levels_payload": payload})
 ################################################################################################################ <-- this is a divider
@@ -138,8 +229,8 @@ def levels_mine_view(request):
                 "created_at": level.created_at.strftime("%Y-%m-%d"),
                 "plays": level.plays,
                 "likes": level.likes,
-                "song_url": level.song_url,
-                "is_public": level.is_public,
+                "song_url": level.get_song_url(),
+                "visibility": level.visibility,
             })
         return render(request, 'Sledgepong/levels_mine.html', {"levels_payload": payload})
 ################################################################################################################ <-- this is a divider

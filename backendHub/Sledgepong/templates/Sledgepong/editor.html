@@ -3,6 +3,8 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="csrf-token" content="{{ csrf_token }}">
+    <meta name="is-superuser" content="{% if is_superuser %}true{% else %}false{% endif %}">
     <title>Sledgepong Level Editor</title>
     <link rel="stylesheet" href="{% static 'Sledgepong/css/editor.css' %}?v=galaxy1">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -15,6 +17,6 @@
         <h1 class="editor-title">Level Editor</h1>
     </div>
     <canvas id="editorCanvas" ></canvas>
-    <script src="{% static 'Sledgepong/js/editor.js' %}?v=galaxy1"></script>
+    <script src="{% static 'Sledgepong/js/editor.js' %}?v=galaxy7"></script>
 </body>
 </html>

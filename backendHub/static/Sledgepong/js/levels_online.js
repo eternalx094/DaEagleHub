@@ -41,7 +41,8 @@ document.addEventListener("DOMContentLoaded", () => {
         btn.appendChild(meta);
 
         btn.addEventListener("click", () => {
-            localStorage.setItem("sledgepong_current_level", JSON.stringify(level.data));
+            const payload = { ...(level.data || {}), song_url: level.song_url || null };
+            localStorage.setItem("sledgepong_current_level", JSON.stringify(payload));
             window.location.href = "/sledgepong/playpage/levels/game";
         });
 

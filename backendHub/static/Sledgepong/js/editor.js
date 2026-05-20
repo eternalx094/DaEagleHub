@@ -225,10 +225,14 @@ class Toolbar {
     onResize() {
         const canvasHeight = this.editor.canvas.height;
         const actions = [
+            { label: this.editor.getSongLabel(), handler: () => this.editor.promptLoadSong() },
+            { label: this.editor.getMusicLabel(), handler: () => this.editor.toggleMusic() },
             { label: "Test Level", handler: () => this.editor.testLevel() },
             { label: "Save Level", handler: () => this.editor.saveLevel() },
+            { label: `Visibility: ${this.editor.getVisibilityLabel()}`, handler: () => this.editor.toggleVisibility() },
             { label: this.editor.getSaveFolderLabel(), handler: () => this.editor.promptSaveFolder() },
             { label: "Load Level", handler: () => this.editor.promptLoadLevel() },
+            { label: "My Cloud Levels", handler: () => this.editor.loadFromCloud() },
             { label: `AutoSnap: ${this.editor.autoSnap ? "On" : "Off"}`, handler: () => this.editor.toggleAutoSnap() },
             { label: "Level Speed", handler: () => this.editor.promptLevelSpeed() },
             { label: "Level Time", handler: () => this.editor.promptLevelDuration() },
@@ -540,7 +544,6 @@ class Editor {
         this.canvas = canvas;
         this.ctx = canvas.getContext("2d");
         this.entities = [];
-        this.toolbar = new Toolbar(this);
         this.currentTool = "block";
         this.dragging = false;
         this.selectedEntity = null;
@@ -556,8 +559,23 @@ class Editor {
         this.dragOffsetY = 0;
         this.message = null;
         this.messageExpires = 0;
-        this.fileInput = this.#createFileInput();
         this.saveFolderHandle = null;
+        this.csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
+        this.isSuperuser = document.querySelector('meta[name="is-superuser"]')?.content === 'true';
+        this.visibility = 'private';
+        this.lastSongUrl = '';
+        this.audioElement = null;
+        this.audioObjectUrl = null;
+        this.audioFile = null;
+        this.audioContext = null;
+        this.audioSongName = null;
+        this.audioIsPlaying = false;
+        this.audioDurationSeconds = 0;
+        this.waveformPeaks = null;
+        this.waveformSamplesPerSecond = 60;
+        this.fileInput = this.#createFileInput();
+        this.audioFileInput = this.#createAudioFileInput();
+        this.toolbar = new Toolbar(this);
 
         this.resize();
         window.addEventListener("resize", () => this.resize());
@@ -579,8 +597,6 @@ class Editor {
         if (tool === "erase") {
             this.#deselectEntities({ silent: true });
         }
-        const toolLabel = label ?? this.#toolLabel(tool);
-        this.showMessage(`${toolLabel} ${tool === "erase" ? "tool ready" : "selected"}`);
     }
 
     showMessage(text) {
@@ -588,19 +604,46 @@ class Editor {
         this.#setMessage(text);
     }
 
-    async testLevel() {
-        const level = await this.saveLevel();
-        if (!level) return;
-        localStorage.setItem("sledgepong_current_level", level);
+    testLevel() {
+        const serializedEntities = this.entities
+            .map(entity => (typeof entity.serialize === "function" ? entity.serialize() : null))
+            .filter(Boolean);
+        if (serializedEntities.length === 0) {
+            this.showMessage("Cannot test empty level");
+            return;
+        }
+        const levelData = {
+            name: "__test__",
+            version: 1,
+            gridSize: this.gridSize,
+            baseSpeed: this.levelSpeed,
+            durationSeconds: this.levelDurationSeconds,
+            entities: serializedEntities,
+            songObjectUrl: this.audioObjectUrl || null,
+            songName: this.audioSongName || null,
+            timestamp: Date.now(),
+        };
+        try {
+            localStorage.setItem("sledgepong_current_level", JSON.stringify(levelData));
+        } catch (e) {
+            console.error("Failed to stash test level:", e);
+            this.showMessage("Could not start test");
+            return;
+        }
         window.open("/sledgepong/playpage/levels/game", "_blank");
     }
     async saveLevel() {
         const serializedEntities = this.entities
             .map(entity => (typeof entity.serialize === "function" ? entity.serialize() : null))
             .filter(Boolean);
-        
+
         if (serializedEntities.length === 0) {
             this.showMessage("Cannot save empty level");
+            return null;
+        }
+
+        if (!this.audioFile) {
+            this.showMessage("Load a song first — save cancelled");
             return null;
         }
 
@@ -621,34 +664,30 @@ class Editor {
             timestamp: Date.now()
         };
 
-        // Save to localStorage for levels page
-        let savedToBrowser = false;
+        const formData = new FormData();
+        formData.append("name", levelName);
+        formData.append("visibility", this.visibility);
+        formData.append("level_data", JSON.stringify(levelData));
+        formData.append("song_file", this.audioFile, this.audioSongName || this.audioFile.name);
+
         try {
-            let savedLevels = [];
-            const saved = localStorage.getItem("sledgepong_levels");
-            if (saved) {
-                savedLevels = JSON.parse(saved);
+            const response = await fetch("/sledgepong/playpage/editor/save/", {
+                method: "POST",
+                headers: { "X-CSRFToken": this.csrfToken },
+                body: formData,
+            });
+            if (!response.ok) {
+                const text = await response.text();
+                this.showMessage(`Save failed: ${text}`);
+                return null;
             }
-            savedLevels.push(levelData);
-            localStorage.setItem("sledgepong_levels", JSON.stringify(savedLevels));
-            localStorage.setItem("sledgepong_recent_level", JSON.stringify(levelData));
-            savedToBrowser = true;
         } catch (e) {
-            console.error("Failed to save to localStorage:", e);
+            console.error("Failed to save to server:", e);
+            this.showMessage("Failed to reach server");
+            return null;
         }
 
-        const fileStatus = await this.#saveLevelFile(levelData, levelName);
-        if (savedToBrowser && fileStatus === "saved") {
-            this.showMessage(`Level "${levelName}" saved!`);
-        } else if (savedToBrowser) {
-            this.showMessage(`Level "${levelName}" saved to browser storage`);
-        } else if (fileStatus === "saved") {
-            this.showMessage(`Level "${levelName}" saved to file`);
-        } else if (fileStatus === "cancelled") {
-            this.showMessage("Save cancelled");
-        } else {
-            this.showMessage("Failed to save level");
-        }
+        this.showMessage(`Level "${levelName}" saved!`);
         return JSON.stringify(levelData);
     }
 
@@ -717,7 +756,46 @@ class Editor {
     promptLoadLevel() {
         this.fileInput.value = "";
         this.fileInput.click();
-        this.showMessage("Select a level file to load");
+    }
+
+    async loadFromCloud() {
+        let levels = [];
+        try {
+            const response = await fetch("/sledgepong/playpage/editor/list/");
+            if (!response.ok) {
+                this.showMessage(response.status === 401 ? "Login required" : "Could not fetch levels");
+                return;
+            }
+            const json = await response.json();
+            levels = Array.isArray(json.levels) ? json.levels : [];
+        } catch (e) {
+            console.error("Failed to fetch cloud levels:", e);
+            this.showMessage("Could not reach server");
+            return;
+        }
+        if (levels.length === 0) {
+            this.showMessage("No saved levels yet");
+            return;
+        }
+        const lines = levels.map((lvl, i) =>
+            `${i + 1}. ${lvl.name} [${lvl.visibility}] (${lvl.created_at})`
+        );
+        const choice = prompt(`Pick a level (1-${levels.length}):\n\n${lines.join("\n")}`, "1");
+        if (choice === null) return;
+        const idx = parseInt(choice, 10) - 1;
+        if (!Number.isInteger(idx) || idx < 0 || idx >= levels.length) {
+            this.showMessage("Invalid selection");
+            return;
+        }
+        const chosen = levels[idx];
+        try {
+            this.#loadFromData(chosen.level_data);
+            this.lastSongUrl = chosen.song_url || this.lastSongUrl;
+            this.showMessage(`Loaded "${chosen.name}"`);
+        } catch (e) {
+            console.error("Failed to load cloud level:", e);
+            this.showMessage("Level data invalid");
+        }
     }
 
     promptLevelSpeed() {
@@ -725,32 +803,22 @@ class Editor {
             `Set level base speed (${MIN_LEVEL_SPEED} - ${MAX_LEVEL_SPEED})`,
             this.levelSpeed.toFixed(2)
         );
-        if (raw === null) {
-            this.showMessage("Level speed unchanged");
-            return;
-        }
+        if (raw === null) return;
         const parsed = Number(raw);
         if (!Number.isFinite(parsed)) {
             this.showMessage("Invalid speed value");
             return;
         }
         this.levelSpeed = sanitizeLevelSpeed(parsed, this.levelSpeed);
-        this.showMessage(`Level speed set to ${this.levelSpeed.toFixed(2)}`);
     }
 
     promptLevelDuration() {
         const currentMinutes = Math.floor(this.levelDurationSeconds / 60);
         const currentSeconds = this.levelDurationSeconds % 60;
         const minuteRaw = prompt("Set level minutes:", String(currentMinutes));
-        if (minuteRaw === null) {
-            this.showMessage("Level time unchanged");
-            return;
-        }
+        if (minuteRaw === null) return;
         const secondRaw = prompt("Set level seconds (0-59):", String(currentSeconds));
-        if (secondRaw === null) {
-            this.showMessage("Level time unchanged");
-            return;
-        }
+        if (secondRaw === null) return;
 
         const minutes = Number(minuteRaw);
         const seconds = Number(secondRaw);
@@ -763,7 +831,6 @@ class Editor {
         const safeSeconds = clampNumber(Math.floor(seconds), 0, 59);
         const total = safeMinutes * 60 + safeSeconds;
         this.levelDurationSeconds = sanitizeLevelDuration(total, this.levelDurationSeconds);
-        this.showMessage(`Level time set to ${formatDuration(this.levelDurationSeconds)}`);
     }
 
     clearEntities() {
@@ -786,6 +853,18 @@ class Editor {
         this.showMessage(`AutoSnap ${this.autoSnap ? "enabled" : "disabled"}`);
     }
 
+    getVisibilityLabel() {
+        return this.visibility.charAt(0).toUpperCase() + this.visibility.slice(1);
+    }
+
+    toggleVisibility() {
+        const cycle = this.isSuperuser ? ['private', 'online', 'original'] : ['private', 'online'];
+        const idx = cycle.indexOf(this.visibility);
+        this.visibility = cycle[(idx + 1) % cycle.length];
+        this.toolbar.onResize();
+        this.showMessage(`Visibility: ${this.getVisibilityLabel()}`);
+    }
+
     getSaveFolderLabel() {
         if (!this.saveFolderHandle) return "Save Folder";
         const name = this.saveFolderHandle.name || "Set";
@@ -806,12 +885,261 @@ class Editor {
             this.showMessage(`Save folder set: ${name}`);
         } catch (error) {
             if (error && error.name === "AbortError") {
-                this.showMessage("Save folder unchanged");
                 return;
             }
             console.error("Failed to set save folder:", error);
             this.showMessage("Failed to set save folder");
         }
+    }
+
+    pxPerSec() {
+        return Math.max(10, this.levelSpeed * 60);
+    }
+
+    timeToX(t) {
+        return t * this.pxPerSec();
+    }
+
+    xToTime(x) {
+        return Math.max(0, x / this.pxPerSec());
+    }
+
+    getSongLabel() {
+        if (!this.audioSongName) return "Load Song";
+        const name = this.audioSongName.length > 14
+            ? this.audioSongName.slice(0, 13) + "…"
+            : this.audioSongName;
+        return `Song: ${name}`;
+    }
+
+    getMusicLabel() {
+        if (!this.audioElement) return "Play Music";
+        return this.audioIsPlaying ? "Pause Music" : "Play Music";
+    }
+
+    promptLoadSong() {
+        this.audioFileInput.value = "";
+        this.audioFileInput.click();
+    }
+
+    toggleMusic() {
+        if (!this.audioElement) {
+            this.showMessage("Load a song first");
+            return;
+        }
+        if (this.audioIsPlaying) {
+            this.audioElement.pause();
+            this.audioIsPlaying = false;
+            this.toolbar.onResize();
+            return;
+        }
+        const a = this.audioElement;
+        console.log("[music] play attempt", {
+            readyState: a.readyState,
+            duration: a.duration,
+            currentTime: a.currentTime,
+            paused: a.paused,
+            muted: a.muted,
+            volume: a.volume,
+            src: a.currentSrc,
+            error: a.error,
+        });
+        a.muted = false;
+        a.volume = 1.0;
+        if (a.duration && a.currentTime >= a.duration - 0.05) {
+            try { a.currentTime = 0; } catch (_) {}
+        }
+        const playPromise = a.play();
+        if (playPromise && typeof playPromise.then === "function") {
+            playPromise
+                .then(() => {
+                    console.log("[music] playing");
+                    this.audioIsPlaying = true;
+                    this.toolbar.onResize();
+                })
+                .catch((e) => {
+                    console.error("[music] play rejected:", e);
+                    const reason = e?.name || e?.message || "blocked";
+                    this.showMessage(`Play failed: ${reason}`);
+                    this.audioIsPlaying = false;
+                    this.toolbar.onResize();
+                });
+        } else {
+            this.audioIsPlaying = true;
+            this.toolbar.onResize();
+        }
+    }
+
+    #createAudioFileInput() {
+        const input = document.createElement("input");
+        input.type = "file";
+        input.accept = "audio/*";
+        input.style.display = "none";
+        document.body.appendChild(input);
+        input.addEventListener("change", (event) => this.#onAudioFileSelected(event));
+        return input;
+    }
+
+    async #onAudioFileSelected(event) {
+        const file = event.target.files?.[0];
+        event.target.value = "";
+        if (!file) return;
+        await this.#loadSongFromFile(file);
+    }
+
+    async #loadSongFromFile(file) {
+        try {
+            if (this.audioElement) {
+                try { this.audioElement.pause(); } catch (_) {}
+                this.audioElement.src = "";
+                if (this.audioElement.parentNode) {
+                    this.audioElement.parentNode.removeChild(this.audioElement);
+                }
+            }
+            if (this.audioObjectUrl) {
+                URL.revokeObjectURL(this.audioObjectUrl);
+                this.audioObjectUrl = null;
+            }
+            this.audioIsPlaying = false;
+            this.waveformPeaks = null;
+            this.audioDurationSeconds = 0;
+
+            this.audioFile = file;
+            const objectUrl = URL.createObjectURL(file);
+            this.audioObjectUrl = objectUrl;
+
+            const audio = document.createElement("audio");
+            audio.preload = "auto";
+            audio.style.display = "none";
+            audio.controls = false;
+            audio.addEventListener("ended", () => {
+                this.audioIsPlaying = false;
+                this.toolbar.onResize();
+            });
+            audio.addEventListener("error", () => {
+                const err = audio.error;
+                console.error("Audio element error:", err, "src:", audio.currentSrc);
+                const codeMap = { 1: "ABORTED", 2: "NETWORK", 3: "DECODE", 4: "FORMAT_UNSUPPORTED" };
+                const reason = err ? (codeMap[err.code] || `code ${err.code}`) : "unknown";
+                this.showMessage(`Audio error: ${reason}`);
+            });
+            audio.addEventListener("canplay", () => {
+                console.log("Audio canplay; duration =", audio.duration);
+            });
+            document.body.appendChild(audio);
+            audio.src = objectUrl;
+            audio.load();
+
+            this.audioElement = audio;
+            this.audioSongName = file.name;
+
+            try {
+                if (!this.audioContext) {
+                    const Ctor = window.AudioContext || window.webkitAudioContext;
+                    if (Ctor) this.audioContext = new Ctor();
+                }
+                if (this.audioContext) {
+                    const arrayBuf = await file.arrayBuffer();
+                    const decoded = await this.audioContext.decodeAudioData(arrayBuf.slice(0));
+                    this.audioDurationSeconds = decoded.duration;
+                    this.waveformPeaks = this.#computeWaveform(decoded, this.waveformSamplesPerSecond);
+                }
+            } catch (decodeError) {
+                console.error("Waveform decode failed:", decodeError);
+            }
+
+            if (!this.audioDurationSeconds) {
+                await new Promise((resolve) => {
+                    if (Number.isFinite(audio.duration) && audio.duration > 0) return resolve();
+                    const done = () => { audio.removeEventListener("loadedmetadata", done); resolve(); };
+                    audio.addEventListener("loadedmetadata", done);
+                    setTimeout(resolve, 3000);
+                });
+                if (Number.isFinite(audio.duration) && audio.duration > 0) {
+                    this.audioDurationSeconds = audio.duration;
+                }
+            }
+
+            this.toolbar.onResize();
+            this.showMessage(`Song loaded: ${file.name}`);
+        } catch (error) {
+            console.error("Failed to load song:", error);
+            this.showMessage("Could not load song");
+        }
+    }
+
+    #computeWaveform(audioBuffer, samplesPerSecond) {
+        const duration = audioBuffer.duration;
+        const totalSamples = Math.max(1, Math.ceil(duration * samplesPerSecond));
+        const peaks = new Float32Array(totalSamples);
+        const channels = audioBuffer.numberOfChannels;
+        const sampleRate = audioBuffer.sampleRate;
+        const samplesPerBin = Math.max(1, Math.floor(sampleRate / samplesPerSecond));
+        for (let ch = 0; ch < channels; ch++) {
+            const data = audioBuffer.getChannelData(ch);
+            for (let i = 0; i < totalSamples; i++) {
+                const start = i * samplesPerBin;
+                const end = Math.min(start + samplesPerBin, data.length);
+                let peak = 0;
+                for (let j = start; j < end; j++) {
+                    const v = Math.abs(data[j]);
+                    if (v > peak) peak = v;
+                }
+                if (peak > peaks[i]) peaks[i] = peak;
+            }
+        }
+        return peaks;
+    }
+
+    drawWaveform(ctx) {
+        if (!this.waveformPeaks || !this.audioDurationSeconds) return;
+        const bandTop = 8;
+        const bandHeight = 54;
+        const centerY = bandTop + bandHeight / 2;
+        const samplesPerSecond = this.waveformSamplesPerSecond;
+        const peakSlotSeconds = 1 / samplesPerSecond;
+        const pxPerSec = this.pxPerSec();
+        const worldLeft = this.viewX;
+        const worldRight = this.viewX + (this.canvas.width - this.toolbar.width);
+        const startTime = Math.max(0, worldLeft / pxPerSec);
+        const endTime = Math.min(this.audioDurationSeconds, worldRight / pxPerSec);
+        if (endTime <= startTime) return;
+        const startIdx = Math.max(0, Math.floor(startTime * samplesPerSecond));
+        const endIdx = Math.min(this.waveformPeaks.length - 1, Math.ceil(endTime * samplesPerSecond));
+        const barWidth = Math.max(1, pxPerSec * peakSlotSeconds - 0.5);
+        ctx.save();
+        ctx.fillStyle = "rgba(10, 20, 40, 0.7)";
+        ctx.fillRect(worldLeft, bandTop, worldRight - worldLeft, bandHeight);
+        ctx.strokeStyle = "rgba(120, 180, 255, 0.35)";
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(worldLeft, centerY);
+        ctx.lineTo(worldRight, centerY);
+        ctx.stroke();
+        ctx.fillStyle = "rgba(140, 220, 255, 0.9)";
+        for (let i = startIdx; i <= endIdx; i++) {
+            const peak = this.waveformPeaks[i] || 0;
+            if (peak <= 0) continue;
+            const x = i * peakSlotSeconds * pxPerSec;
+            const h = peak * (bandHeight * 0.5);
+            ctx.fillRect(x, centerY - h, barWidth, h * 2);
+        }
+        ctx.restore();
+    }
+
+    drawPlayhead(ctx) {
+        if (!this.audioElement) return;
+        const t = this.audioElement.currentTime || 0;
+        if (!Number.isFinite(t)) return;
+        const x = t * this.pxPerSec();
+        ctx.save();
+        ctx.strokeStyle = "rgba(255, 90, 120, 0.95)";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, this.canvas.height);
+        ctx.stroke();
+        ctx.restore();
     }
 
     #bindEvents() {
@@ -833,7 +1161,7 @@ class Editor {
 
             if (e.button !== 0) return;
             const world = this.#toWorld(x, y);
-            this.#placeOrSelectEntity(world.x, world.y);
+            this.#placeOrSelectEntity(world.x, world.y, e.shiftKey);
         });
 
         this.canvas.addEventListener("mousemove", (e) => {
@@ -848,10 +1176,11 @@ class Editor {
 
             if (this.dragging && this.selectedEntity) {
                 const world = this.#toWorld(x, y);
+                const freeMove = e.shiftKey || !this.autoSnap;
                 if (this.selectedEntity instanceof Trigger) {
                     const desiredX = world.x - this.dragOffsetX;
                     const desiredY = world.y - this.dragOffsetY;
-                    if (this.autoSnap) {
+                    if (!freeMove) {
                         const snapped = this.#centerOnGrid(this.#snapToGrid(desiredX - this.gridSize / 2, desiredY - this.gridSize / 2));
                         this.selectedEntity.x = snapped.x;
                         this.selectedEntity.y = snapped.y;
@@ -862,7 +1191,7 @@ class Editor {
                 } else {
                     const desiredX = world.x - this.dragOffsetX;
                     const desiredY = world.y - this.dragOffsetY;
-                    if (this.autoSnap) {
+                    if (!freeMove) {
                         const snapped = this.#snapToGrid(desiredX, desiredY);
                         this.selectedEntity.x = snapped.x;
                         this.selectedEntity.y = snapped.y;
@@ -920,9 +1249,7 @@ class Editor {
 
         if (e.key === "Escape") {
             if (this.selectedEntity) {
-                this.#deselectEntities();
-            } else {
-                this.showMessage("Nothing selected");
+                this.#deselectEntities({ silent: true });
             }
             return;
         }
@@ -1058,7 +1385,7 @@ class Editor {
         };
     }
 
-    #placeOrSelectEntity(x, y) {
+    #placeOrSelectEntity(x, y, shiftHeld = false) {
         const target = this.#findEntityAt(x, y);
         if (target) {
             if (this.currentTool === "erase") {
@@ -1077,33 +1404,31 @@ class Editor {
             return;
         }
 
+        const freeMove = shiftHeld || !this.autoSnap;
+
         if (PLACEABLE_OBJECT_TOOLS.has(this.currentTool)) {
-            const topLeft = this.autoSnap
-                ? this.#snapToGrid(x - this.gridSize / 2, y - this.gridSize / 2)
-                : { x: x - this.gridSize / 2, y: y - this.gridSize / 2 };
+            const topLeft = freeMove
+                ? { x: x - this.gridSize / 2, y: y - this.gridSize / 2 }
+                : this.#snapToGrid(x - this.gridSize / 2, y - this.gridSize / 2);
             const object = new GameObject(topLeft.x, topLeft.y, this.currentTool);
             this.entities.push(object);
             this.dragOffsetX = object.size / 2;
             this.dragOffsetY = object.size / 2;
             this.#selectEntity(object, { silent: true });
-            this.showMessage(`${this.#toolLabel(this.currentTool)} placed`);
             return;
         }
 
         if (PLACEABLE_TRIGGER_TOOLS.has(this.currentTool)) {
-            const center = this.autoSnap
-                ? this.#centerOnGrid(this.#snapToGrid(x - this.gridSize / 2, y - this.gridSize / 2))
-                : { x, y };
+            const center = freeMove
+                ? { x, y }
+                : this.#centerOnGrid(this.#snapToGrid(x - this.gridSize / 2, y - this.gridSize / 2));
             const trigger = new Trigger(center.x, center.y, this.currentTool);
             this.entities.push(trigger);
             this.dragOffsetX = 0;
             this.dragOffsetY = 0;
             this.#selectEntity(trigger, { silent: true });
-            this.showMessage(`${this.#toolLabel(this.currentTool)} trigger placed`);
             return;
         }
-
-        this.showMessage("Select a tool to place items");
     }
 
     #findEntityAt(x, y) {
@@ -1116,18 +1441,14 @@ class Editor {
         return null;
     }
 
-    #selectEntity(entity, { startDragging = false, silent = false } = {}) {
+    #selectEntity(entity, { startDragging = false } = {}) {
         this.#deselectEntities({ silent: true });
         entity.selected = true;
         this.selectedEntity = entity;
         this.dragging = !!startDragging;
-        if (!silent) {
-            const suffix = entity instanceof Trigger ? " trigger" : "";
-            this.showMessage(`${this.#toolLabel(entity.type)}${suffix} selected`);
-        }
     }
 
-    #deselectEntities({ silent = false } = {}) {
+    #deselectEntities() {
         for (const entity of this.entities) {
             entity.selected = false;
         }
@@ -1135,12 +1456,9 @@ class Editor {
         this.dragging = false;
         this.dragOffsetX = 0;
         this.dragOffsetY = 0;
-        if (!silent) {
-            this.showMessage("Selection cleared");
-        }
     }
 
-    #removeEntity(entity, { silent = false } = {}) {
+    #removeEntity(entity) {
         const index = this.entities.indexOf(entity);
         if (index === -1) return;
         this.entities.splice(index, 1);
@@ -1149,10 +1467,6 @@ class Editor {
             this.dragging = false;
             this.dragOffsetX = 0;
             this.dragOffsetY = 0;
-        }
-        if (!silent) {
-            const suffix = entity instanceof Trigger ? " trigger removed" : " removed";
-            this.showMessage(`${this.#toolLabel(entity.type)}${suffix}`);
         }
     }
 
@@ -1241,15 +1555,28 @@ class Editor {
         this.ctx.rect(this.toolbar.width, 0, this.canvas.width - this.toolbar.width, this.canvas.height);
         this.ctx.clip();
         this.ctx.translate(-this.viewX, 0);
+        this.drawWaveform(this.ctx);
         this.drawGrid();
         for (const entity of this.entities) entity.draw(this.ctx);
+        this.drawPlayhead(this.ctx);
         this.ctx.restore();
         this.#drawStatus();
         this.#drawOverlay();
     }
 
+    #syncViewToAudio() {
+        if (!this.audioIsPlaying || !this.audioElement) return;
+        if (this.isPanning) return;
+        const t = this.audioElement.currentTime;
+        if (!Number.isFinite(t)) return;
+        const playheadX = t * this.pxPerSec();
+        const centerOffset = (this.canvas.width - this.toolbar.width) / 2;
+        this.viewX = Math.max(0, playheadX - centerOffset);
+    }
+
     loop() {
         requestAnimationFrame(() => this.loop());
+        this.#syncViewToAudio();
         this.draw();
     }
 }

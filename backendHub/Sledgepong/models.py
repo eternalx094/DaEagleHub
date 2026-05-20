@@ -51,14 +51,33 @@ class Level(models.Model):
     level_data = models.JSONField()
 ##############################################################################
 class OnlineLevel(models.Model):
+    class Visibility:
+        PRIVATE = 'private'
+        ONLINE = 'online'
+        ORIGINAL = 'original'
+        CHOICES = (
+            (PRIVATE, 'Private'),
+            (ONLINE, 'Online'),
+            (ORIGINAL, 'Original'),
+        )
+
     name = models.CharField(max_length=80)
     created_at = models.DateTimeField(auto_now_add=True)
     creator = models.ForeignKey(Player, on_delete=models.SET_NULL, null=True, blank=True, related_name="online_levels")
-    is_public = models.BooleanField(default=False)
+    visibility = models.CharField(choices=Visibility.CHOICES, default=Visibility.PRIVATE, max_length=20)
     plays = models.PositiveIntegerField(default=0)
     likes = models.PositiveIntegerField(default=0)
     song_url = models.URLField(blank=True, null=True)
+    song_file = models.FileField(upload_to="Sledgepong/songs/", blank=True, null=True)
     level_data = models.JSONField()
+
+    def get_song_url(self):
+        if self.song_file:
+            try:
+                return self.song_file.url
+            except ValueError:
+                return None
+        return self.song_url or None
 
     def __str__(self):
         return self.name

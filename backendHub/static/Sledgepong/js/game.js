@@ -498,7 +498,8 @@ class Player {
       const cameFromAbove = this.previousY + this.previousHeight <= block.y;
       const cameFromBelow = this.previousY >= block.y + block.height;
       const verticalOverlap = Math.min(this.y + this.height, block.y + block.height) - Math.max(this.y, block.y);
-      const verticalOverlapSafe = verticalOverlap > this.height * 0.5;
+      const killOverlapThreshold = Math.min(this.height, block.height) * 0.5;
+      const verticalOverlapSafe = verticalOverlap > killOverlapThreshold;
       const landingTolerance = 6;
       const likelyLandingContact =
         this.gravityDir > 0
@@ -719,12 +720,55 @@ class Game {
     this.startMarkerX = null;
     this.finishMarkerX = null;
     this.completed = false;
+    this.songAudio = null;
+    this.songUrl = null;
 
     this.resize();
     window.addEventListener("resize", () => this.resize());
 
     this.loadLevel();
+    this.setupAudio();
     this.loop();
+  }
+
+  setupAudio() {
+    if (!this.songUrl) return;
+    const audio = document.createElement("audio");
+    audio.preload = "auto";
+    audio.style.display = "none";
+    audio.addEventListener("error", () => {
+      console.error("[game audio] error:", audio.error, audio.currentSrc);
+    });
+    document.body.appendChild(audio);
+    audio.src = this.songUrl;
+    audio.load();
+    this.songAudio = audio;
+    const tryStart = () => {
+      const p = audio.play();
+      if (p && typeof p.then === "function") {
+        p.catch((err) => {
+          console.warn("[game audio] autoplay blocked, will retry on input:", err);
+          const onUserInput = () => {
+            audio.play().catch((e2) => console.error("[game audio] retry failed:", e2));
+            window.removeEventListener("pointerdown", onUserInput);
+            window.removeEventListener("keydown", onUserInput);
+          };
+          window.addEventListener("pointerdown", onUserInput, { once: true });
+          window.addEventListener("keydown", onUserInput, { once: true });
+        });
+      }
+    };
+    if (audio.readyState >= 2) tryStart();
+    else audio.addEventListener("canplay", tryStart, { once: true });
+  }
+
+  restartAudio() {
+    if (!this.songAudio) return;
+    try {
+      this.songAudio.currentTime = 0;
+      const p = this.songAudio.play();
+      if (p && typeof p.then === "function") p.catch(() => {});
+    } catch (_) {}
   }
 
   createEmptyLevel() {
@@ -795,6 +839,12 @@ class Game {
     level.baseSpeed = clamp(levelSpeed, MIN_LEVEL_SPEED, MAX_LEVEL_SPEED);
     const durationSeconds = asNumber(data.durationSeconds ?? data.lengthSeconds, 0);
     level.durationSeconds = clamp(durationSeconds, 0, MAX_LEVEL_DURATION_SECONDS);
+
+    const songCandidate = (typeof data.songObjectUrl === "string" && data.songObjectUrl)
+      || (typeof data.song_url === "string" && data.song_url)
+      || (typeof data.songUrl === "string" && data.songUrl)
+      || null;
+    if (songCandidate) this.songUrl = songCandidate;
     const bounds = {
       minX: Infinity,
       maxX: -Infinity,
@@ -996,19 +1046,15 @@ class Game {
       }
 
       const finishLine = this.level.finishLine;
-      if (!this.player.dead && finishLine && this.input.hasBufferedPress()) {
-        const withinFinishX =
-          this.player.x + this.player.width >= finishLine.x &&
-          this.player.x <= finishLine.x + finishLine.width;
-        if (withinFinishX) {
+      if (!this.player.dead && finishLine) {
+        const crossedFinishX = this.player.x + this.player.width >= finishLine.x;
+        if (crossedFinishX) {
           this.completed = true;
           this.player.baseSpeed = 0;
           this.player.vx = 0;
           this.player.vy = 0;
-          this.player.y = finishLine.y + finishLine.height * 0.5 - this.player.height * 0.5;
           this.announce("Finish!", "#9AFFF0");
           this.spawnBurst(finishLine.centerX, this.player.y + this.player.height * 0.5, "#9AFFF0", 24);
-          this.input.consumeBufferedPress();
         }
       }
     }
@@ -1030,7 +1076,10 @@ class Game {
         this.respawnCounter = RESPAWN_DELAY_FRAMES;
       } else {
         this.respawnCounter--;
-        if (this.respawnCounter <= 0) this.loadLevel();
+        if (this.respawnCounter <= 0) {
+          this.loadLevel();
+          this.restartAudio();
+        }
       }
     } else {
       this.respawnCounter = -1;
