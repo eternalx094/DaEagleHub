@@ -27,7 +27,23 @@ SECRET_KEY = 'django-insecure-0u6e$kbkf)blr8wy+uqt3m5+t3=_us87fy!x7g_l5buju#r*p=
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["127.0.0.1", '155.212.225.65', "localhost", "0.0.0.0"]
+ALLOWED_HOSTS = [
+    "daeaglehub.com",
+    "www.daeaglehub.com",
+    "127.0.0.1",
+    "155.212.225.65",
+    "localhost",
+    "0.0.0.0",
+]
+
+CSRF_TRUSTED_ORIGINS = [
+    "http://daeaglehub.com",
+    "http://www.daeaglehub.com",
+    "https://daeaglehub.com",
+    "https://www.daeaglehub.com",
+]
+
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
 
 # Application definition
