@@ -3,6 +3,7 @@ services:
     image: nginx:alpine
     ports:
       - "80:80"
+      - "443:443"
     volumes:
       - type: bind
         source: ./nginx/nginx.conf
@@ -15,6 +16,14 @@ services:
       - type: bind
         source: ./backendHub/media
         target: /media
+        read_only: true
+      - type: bind
+        source: /etc/letsencrypt
+        target: /etc/letsencrypt
+        read_only: true
+      - type: bind
+        source: /var/www/certbot
+        target: /var/www/certbot
         read_only: true
     depends_on:
       - backend
