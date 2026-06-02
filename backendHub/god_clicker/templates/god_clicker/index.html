@@ -1,0 +1,116 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="csrf-token" content="{{ csrf_token }}">
+    <title>God Clicker</title>
+    <style>
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background: radial-gradient(ellipse at top, #2a1a4a 0%, #0a0618 70%);
+            color: #f3ecd6;
+            font-family: 'Georgia', serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 32px 16px;
+        }
+        h1 {
+            font-size: 3em;
+            margin: 0 0 8px 0;
+            letter-spacing: 4px;
+            color: #f5d976;
+            text-shadow: 0 2px 12px rgba(245, 217, 118, 0.5);
+        }
+        .subtitle {
+            opacity: 0.7;
+            margin-bottom: 32px;
+        }
+        .favor-counter {
+            font-size: 2.4em;
+            color: #f5d976;
+            margin-bottom: 24px;
+        }
+        .click-button {
+            width: 220px;
+            height: 220px;
+            border-radius: 50%;
+            border: 4px solid #f5d976;
+            background: radial-gradient(circle at 35% 35%, #6e54b4, #2a1a4a);
+            color: #f3ecd6;
+            font-family: inherit;
+            font-size: 1.4em;
+            cursor: pointer;
+            box-shadow: 0 0 40px rgba(245, 217, 118, 0.3);
+            transition: transform 0.05s;
+        }
+        .click-button:active {
+            transform: scale(0.96);
+        }
+        .gods-panel {
+            margin-top: 48px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px;
+            max-width: 960px;
+            width: 100%;
+        }
+        .god-card {
+            border: 1px solid rgba(245, 217, 118, 0.3);
+            background: rgba(15, 10, 35, 0.6);
+            padding: 16px;
+            border-radius: 8px;
+        }
+        .god-card h3 {
+            margin: 0 0 4px 0;
+            color: #f5d976;
+        }
+        .back-link {
+            position: fixed;
+            top: 16px;
+            left: 16px;
+            color: #f5d976;
+            text-decoration: none;
+            font-size: 1.1em;
+        }
+    </style>
+</head>
+<body>
+    <a class="back-link" href="/">&larr; Back</a>
+    <h1>GOD CLICKER</h1>
+    <p class="subtitle">Earn the favor of Olympus, one click at a time.</p>
+
+    <div class="favor-counter">
+        Favor: <span id="favor">{{ player.favor|default:0 }}</span>
+    </div>
+
+    <button id="clickButton" class="click-button">Pray</button>
+
+    {% if gods %}
+    <div class="gods-panel">
+        {% for god in gods %}
+            <div class="god-card">
+                <h3>{{ god.name }}</h3>
+                {% if god.title %}<p style="margin:0 0 8px;opacity:0.7;">{{ god.title }}</p>{% endif %}
+                <p style="margin:0 0 8px;">{{ god.description|default:"" }}</p>
+                <p style="margin:0;">Cost: {{ god.base_cost }} favor</p>
+                {% if god.id in owned_god_ids %}<p style="color:#7cfc00;">Worshipped</p>{% endif %}
+            </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <script>
+        const favorEl = document.getElementById("favor");
+        const clickBtn = document.getElementById("clickButton");
+        let favor = parseInt(favorEl.textContent, 10) || 0;
+        const perClick = {{ player.favor_per_click|default:1 }};
+        clickBtn.addEventListener("click", () => {
+            favor += perClick;
+            favorEl.textContent = favor;
+        });
+    </script>
+</body>
+</html>

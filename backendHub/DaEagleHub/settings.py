@@ -57,6 +57,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'DaHub.apps.DaHubConfig',
     'Sledgepong.apps.SledgepongConfig',
+    'god_clicker.apps.GodClickerConfig',
 ]
 
 MIDDLEWARE = [
