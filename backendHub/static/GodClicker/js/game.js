@@ -9,14 +9,16 @@
 
   const GENERATORS = JSON.parse(document.getElementById("generators-data").textContent);
   const UPGRADES = JSON.parse(document.getElementById("upgrades-data").textContent);
+  const REBIRTH = JSON.parse(document.getElementById("rebirth-data").textContent || "{}");
 
   // ---- Game state -----------------------------------------------------------
   const state = Object.assign(
-    { faith: 0, total_faith: 0, click_power: 1, generators: {}, upgrades: [] },
+    { faith: 0, total_faith: 0, click_power: 1, generators: {}, upgrades: [], rebirths: 0 },
     JSON.parse(document.getElementById("state-data").textContent || "{}")
   );
   state.generators = state.generators || {};
   state.upgrades = state.upgrades || [];
+  state.rebirths = state.rebirths || 0;
 
   // Transient (not saved): temporary buffs granted by Boons.
   let buffs = []; // [{id, name, prod, click, until}]
@@ -25,6 +27,13 @@
   const owned = (id) => state.generators[id] || 0;
   const hasUpgrade = (id) => state.upgrades.indexOf(id) !== -1;
   const reqMet = (up) => !up.req || owned(up.req.gen) >= up.req.count;
+
+  // Rebirth (ascension): each rebirth permanently multiplies all Faith gains
+  // and unlocks content tagged with a higher `rebirth` tier.
+  const rebirthMultiplier = () => Math.pow(REBIRTH.mult || 1, state.rebirths);
+  const rebirthThreshold = () => (REBIRTH.base || Infinity) * Math.pow(REBIRTH.growth || 1, state.rebirths);
+  const genUnlocked = (gen) => (gen.rebirth || 0) <= state.rebirths;
+  const upgradeUnlocked = (up) => (up.rebirth || 0) <= state.rebirths;
 
   function generatorCost(gen) {
     return Math.ceil(gen.base_cost * Math.pow(gen.growth, owned(gen.id)));
@@ -70,13 +79,13 @@
     return pct;
   }
   const effectiveClick = () =>
-    state.click_power * clickBuffMult() + clickCpsPct() * computePerSecond();
+    state.click_power * clickBuffMult() * rebirthMultiplier() + clickCpsPct() * computePerSecond();
 
   // Total Faith produced per second by all generators (incl. globals + buffs).
   function computePerSecond() {
     let base = 0;
     GENERATORS.forEach((g) => { base += g.cps * owned(g.id) * genUpgradeMult(g.id); });
-    return base * globalUpgradeMult() * prodBuffMult();
+    return base * globalUpgradeMult() * prodBuffMult() * rebirthMultiplier();
   }
 
   // Compact number formatting (1.23K, 4.56M, ...).
@@ -92,6 +101,8 @@
     faith: document.getElementById("faith"),
     perSecond: document.getElementById("perSecond"),
     totalFaith: document.getElementById("totalFaith"),
+    rebirthInfo: document.getElementById("rebirthInfo"),
+    rebirthBtn: document.getElementById("rebirthBtn"),
     deity: document.getElementById("deity"),
     clickInfo: document.getElementById("clickInfo"),
     generators: document.getElementById("generators"),
@@ -102,8 +113,6 @@
     resetBtn: document.getElementById("resetBtn"),
     saveStatus: document.getElementById("saveStatus"),
     muteBtn: document.getElementById("muteBtn"),
-    lightning: document.getElementById("lightning"),
-    stars: document.getElementById("stars"),
     buffBar: document.getElementById("buffBar"),
     game: document.querySelector(".game"),
   };
@@ -266,6 +275,9 @@
 
     GENERATORS.forEach((gen) => {
       const node = el.generators.querySelector('[data-gen="' + gen.id + '"]');
+      const unlocked = genUnlocked(gen);
+      node.classList.toggle("hidden", !unlocked);
+      if (!unlocked) return;
       const cost = generatorCost(gen);
       node.querySelector(".item-cost").textContent = fmt(cost);
       node.querySelector(".item-count").textContent = owned(gen.id);
@@ -276,7 +288,7 @@
     let anyUpgrade = false;
     UPGRADES.forEach((up) => {
       const node = el.upgrades.querySelector('[data-upgrade="' + up.id + '"]');
-      const show = !hasUpgrade(up.id) && reqMet(up);
+      const show = !hasUpgrade(up.id) && reqMet(up) && upgradeUnlocked(up);
       node.classList.toggle("hidden", !show);
       if (show) {
         anyUpgrade = true;
@@ -285,6 +297,25 @@
       }
     });
     el.noUpgrades.style.display = anyUpgrade ? "none" : "block";
+
+    updateRebirthUI();
+  }
+
+  function updateRebirthUI() {
+    el.rebirthInfo.textContent = state.rebirths > 0
+      ? "Rebirths: " + state.rebirths + "  (×" + fmt(rebirthMultiplier()) + " Faith)"
+      : "";
+    const thr = rebirthThreshold();
+    const progress = state.total_faith; // rebirth is gated on lifetime Faith this run
+    const ready = progress >= thr;
+    el.rebirthBtn.disabled = !ready;
+    if (ready) {
+      el.rebirthBtn.textContent = "★ Rebirth → ×" + fmt(REBIRTH.mult || 1) + " Faith forever";
+    } else {
+      const pct = Math.min(100, (progress / thr) * 100);
+      el.rebirthBtn.textContent =
+        "Rebirth: " + fmt(Math.floor(progress)) + " / " + fmt(thr) + " total prayed (" + pct.toFixed(1) + "%)";
+    }
   }
 
   // ==========================================================================
@@ -410,32 +441,6 @@
   }
 
   // ==========================================================================
-  // Scenery — stars + periodic lightning
-  // ==========================================================================
-  function seedStars() {
-    const frag = document.createDocumentFragment();
-    for (let i = 0; i < 80; i++) {
-      const s = document.createElement("div");
-      s.className = "star";
-      s.style.left = Math.random() * 100 + "%";
-      s.style.top = Math.random() * 60 + "%";
-      const size = 1 + Math.random() * 2;
-      s.style.width = s.style.height = size + "px";
-      s.style.animationDelay = Math.random() * 3 + "s";
-      frag.appendChild(s);
-    }
-    el.stars.appendChild(frag);
-  }
-
-  function lightningLoop() {
-    el.lightning.classList.remove("flash");
-    void el.lightning.offsetWidth;
-    el.lightning.classList.add("flash");
-    tone(70, 0, 0.5, "sawtooth", 0.05); // faint distant rumble
-    setTimeout(lightningLoop, 8000 + Math.random() * 14000);
-  }
-
-  // ==========================================================================
   // Persistence
   // ==========================================================================
   const LOCAL_KEY = "godclicker_save";
@@ -445,7 +450,7 @@
   };
   const snapshot = () => ({
     faith: state.faith, total_faith: state.total_faith, click_power: state.click_power,
-    generators: state.generators, upgrades: state.upgrades,
+    generators: state.generators, upgrades: state.upgrades, rebirths: state.rebirths,
   });
   function saveLocal() {
     try { localStorage.setItem(LOCAL_KEY, JSON.stringify(snapshot())); } catch (_) {}
@@ -467,9 +472,9 @@
       .catch(() => { if (!silent) flashStatus("Save failed (offline)", true); });
   }
   function resetGame() {
-    if (!window.confirm("Abandon all your worshippers and start over?")) return;
+    if (!window.confirm("Abandon EVERYTHING — Faith, followers, blessings and rebirths — and start completely over?")) return;
     state.faith = 0; state.total_faith = 0; state.click_power = 1;
-    state.generators = {}; state.upgrades = []; buffs = [];
+    state.generators = {}; state.upgrades = []; state.rebirths = 0; buffs = [];
     renderBuffs(); saveLocal();
     if (cfg.isAuthenticated && cfg.resetUrl) {
       fetch(cfg.resetUrl, { method: "POST", headers: { "X-CSRFToken": getCsrf() } });
@@ -477,8 +482,47 @@
     refresh();
     flashStatus("Pantheon reset");
   }
+
+  // ---- Rebirth (ascension) ----
+  function celebrateRebirth() {
+    buffs = []; renderBuffs();
+    ensureAudio(); sfx.boon();
+    banner("Rebirth " + state.rebirths + "!  ×" + fmt(rebirthMultiplier()) + " Faith");
+    burst(window.innerWidth / 2, window.innerHeight / 2, 30, "#d9b3ff");
+    shake();
+    saveLocal();
+    refresh();
+  }
+
+  function doRebirth() {
+    if (state.total_faith < rebirthThreshold()) { sfx.error(); return; }
+    if (!window.confirm(
+      "Rebirth now? You will lose all Faith, followers and blessings, but gain a " +
+      "permanent ×" + (REBIRTH.mult || 1) + " to all Faith and unlock new gods.\n\n" +
+      "This will be rebirth #" + (state.rebirths + 1) + "."
+    )) return;
+
+    if (cfg.isAuthenticated && cfg.rebirthUrl) {
+      fetch(cfg.rebirthUrl, { method: "POST", headers: { "X-CSRFToken": getCsrf() } })
+        .then((r) => (r.ok ? r.json() : Promise.reject()))
+        .then((s) => {
+          Object.assign(state, s);
+          state.generators = state.generators || {};
+          state.upgrades = state.upgrades || [];
+          celebrateRebirth();
+        })
+        .catch(() => flashStatus("Rebirth failed", true));
+    } else {
+      state.rebirths += 1;
+      state.faith = 0; state.total_faith = 0; state.click_power = 1;
+      state.generators = {}; state.upgrades = [];
+      celebrateRebirth();
+    }
+  }
+
   el.saveBtn.addEventListener("click", () => saveServer(false));
   el.resetBtn.addEventListener("click", resetGame);
+  el.rebirthBtn.addEventListener("click", doRebirth);
 
   // ==========================================================================
   // Loops + boot
@@ -502,9 +546,7 @@
   }
   state.click_power = computeClickPower();
   updateMuteBtn();
-  seedStars();
   buildList();
   refresh();
   scheduleBoon();
-  setTimeout(lightningLoop, 5000);
 })();

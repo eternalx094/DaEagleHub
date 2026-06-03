@@ -25,6 +25,9 @@ class GodPlayer(models.Model):
     generators = models.JSONField(default=dict, blank=True)
     # [upgrade_id, ...] of purchased upgrades.
     upgrades = models.JSONField(default=list, blank=True)
+    # Number of times the player has rebirthed. Each rebirth permanently boosts
+    # all Faith gains and unlocks rebirth-gated gods and blessings.
+    rebirths = models.IntegerField(default=0)
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):

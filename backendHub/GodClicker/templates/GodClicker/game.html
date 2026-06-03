@@ -4,7 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="{% static 'GodClicker/css/game.css' %}?v=3">
+    <link rel="stylesheet" href="{% static 'GodClicker/css/scene.css' %}?v=1">
+    <link rel="stylesheet" href="{% static 'GodClicker/css/game.css' %}?v=5">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Jersey+15&display=swap" rel="stylesheet">
@@ -62,6 +63,7 @@
                 <div class="faith-label">Faith</div>
                 <div id="perSecond" class="per-second">0 / sec</div>
                 <div id="totalFaith" class="total-faith">0 prayed in total</div>
+                <div id="rebirthInfo" class="rebirth-info"></div>
             </div>
             <button id="deity" class="deity" aria-label="Pray to the god">
                 <span class="deity-glyph">&#9889;</span>
@@ -71,6 +73,7 @@
                 <button id="saveBtn" class="ctrl-btn">Save</button>
                 <button id="resetBtn" class="ctrl-btn danger">Reset</button>
             </div>
+            <button id="rebirthBtn" class="rebirth-btn" disabled>Rebirth</button>
             <div id="saveStatus" class="save-status"></div>
         </section>
 
@@ -97,13 +100,16 @@
     <script id="generators-data" type="application/json">{{ generators_json|safe }}</script>
     <script id="upgrades-data" type="application/json">{{ upgrades_json|safe }}</script>
     <script id="state-data" type="application/json">{{ state_json|safe }}</script>
+    <script id="rebirth-data" type="application/json">{{ rebirth_json|safe }}</script>
     <script>
         window.GODCLICKER = {
             saveUrl: "{% url 'godclicker-save' %}",
             resetUrl: "{% url 'godclicker-reset' %}",
+            rebirthUrl: "{% url 'godclicker-rebirth' %}",
             isAuthenticated: {% if user.is_authenticated %}true{% else %}false{% endif %},
         };
     </script>
-    <script src="{% static 'GodClicker/js/game.js' %}?v=3"></script>
+    <script src="{% static 'GodClicker/js/scene.js' %}?v=1"></script>
+    <script src="{% static 'GodClicker/js/game.js' %}?v=6"></script>
 </body>
 </html>

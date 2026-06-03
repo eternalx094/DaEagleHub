@@ -1,0 +1,130 @@
+/* backendHub/static/GodClicker/css/scene.css
+   Shared animated Mount Olympus backdrop, used by both the menu and the game.
+   Pure SVG/CSS — no image assets. Pair with scene.js (seeds stars + lightning). */
+
+.scene {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.sky {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg,
+    #1a1f4a 0%, #3a2a5e 28%, #7d4a52 55%, #c8862f 80%, #f0c46a 100%);
+  background-size: 100% 200%;
+  animation: skyDrift 40s ease-in-out infinite;
+}
+@keyframes skyDrift {
+  0%, 100% { background-position: 0 0%; }
+  50% { background-position: 0 30%; }
+}
+
+.sun {
+  position: absolute;
+  top: 16%;
+  left: 50%;
+  width: 220px;
+  height: 220px;
+  margin-left: -110px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 244, 214, 0.95) 0%, rgba(245, 200, 110, 0.7) 40%, transparent 70%);
+  filter: blur(2px);
+  animation: sunPulse 8s ease-in-out infinite;
+}
+@keyframes sunPulse {
+  0%, 100% { transform: scale(1); opacity: 0.9; }
+  50% { transform: scale(1.08); opacity: 1; }
+}
+
+.stars { position: absolute; inset: 0; }
+.stars .star {
+  position: absolute;
+  width: 2px;
+  height: 2px;
+  border-radius: 50%;
+  background: #fff;
+  opacity: 0.8;
+  animation: twinkle 3s ease-in-out infinite;
+}
+@keyframes twinkle {
+  0%, 100% { opacity: 0.15; transform: scale(0.8); }
+  50% { opacity: 0.95; transform: scale(1.3); }
+}
+
+/* Clouds */
+.clouds { position: absolute; inset: 0; }
+.cloud {
+  position: absolute;
+  width: 260px;
+  height: 100px;
+  fill: rgba(255, 248, 235, 0.55);
+  filter: blur(1px) drop-shadow(0 8px 14px rgba(0, 0, 0, 0.12));
+}
+.cloud.c1 { top: 22%; left: -300px; animation: drift 55s linear infinite; }
+.cloud.c2 { top: 38%; left: -300px; transform: scale(1.4); animation: drift 80s linear infinite 8s; opacity: 0.8; }
+.cloud.c3 { top: 14%; left: -300px; transform: scale(0.8); animation: drift 42s linear infinite 4s; opacity: 0.7; }
+@keyframes drift {
+  from { transform: translateX(0); }
+  to { transform: translateX(120vw); }
+}
+
+/* Parallax mountains */
+.mountains {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  bottom: 0;
+}
+.mountains.far  { height: 46vh; fill: #4a3a63; opacity: 0.75; animation: sway 22s ease-in-out infinite; }
+.mountains.mid  { height: 38vh; fill: #3a2a4a; opacity: 0.9;  animation: sway 18s ease-in-out infinite reverse; }
+.mountains.near { height: 30vh; fill: #241a2f; }
+.mountains .snow { fill: rgba(245, 240, 255, 0.92); }
+@keyframes sway {
+  0%, 100% { transform: translateX(0); }
+  50% { transform: translateX(-18px); }
+}
+
+/* Temple colonnade in the foreground */
+.colonnade {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 22vh;
+  display: flex;
+  justify-content: space-between;
+  padding: 0 4vw;
+  align-items: flex-end;
+}
+.colonnade .column {
+  width: 46px;
+  height: 100%;
+  background: linear-gradient(90deg, rgba(20, 14, 26, 0.95), rgba(40, 28, 48, 0.95), rgba(20, 14, 26, 0.95));
+  border-radius: 6px 6px 0 0;
+  box-shadow: inset -4px 0 6px rgba(0, 0, 0, 0.4), inset 4px 0 6px rgba(0, 0, 0, 0.4);
+}
+
+/* Lightning flash */
+.lightning {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 50% 30%, rgba(255, 255, 255, 0.85), rgba(200, 220, 255, 0.2) 40%, transparent 70%);
+  opacity: 0;
+  mix-blend-mode: screen;
+}
+.lightning.flash { animation: flash 0.6s ease-out; }
+@keyframes flash {
+  0% { opacity: 0; }
+  8% { opacity: 0.9; }
+  16% { opacity: 0.1; }
+  24% { opacity: 0.8; }
+  100% { opacity: 0; }
+}
+
+@media (max-width: 900px) {
+  .colonnade { display: none; }
+}
