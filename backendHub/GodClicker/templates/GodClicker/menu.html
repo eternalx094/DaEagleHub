@@ -1,0 +1,21 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="{% static 'GodClicker/css/menu.css' %}?v=1">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Jersey+15&display=swap" rel="stylesheet">
+    <title>God Clicker</title>
+</head>
+<body>
+    <a id="backButton" href="{% url 'hub_view' %}">Back to Hub</a>
+    <div class="modal">
+        <div class="lobby">
+            <h1 class="main-title">God Clicker</h1>
+            <p class="subtitle">Gather the Faith of mortals. Ascend to Olympus.</p>
+            <a class="btns" href="{% url 'godclicker-game' %}">Play</a>
+        </div>
+    </div>
+</body>
+</html>

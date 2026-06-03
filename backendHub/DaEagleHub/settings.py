@@ -41,6 +41,12 @@ CSRF_TRUSTED_ORIGINS = [
     "http://www.daeaglehub.com",
     "https://daeaglehub.com",
     "https://www.daeaglehub.com",
+    "http://localhost",
+    "http://localhost:8000",
+    "http://localhost:8080",
+    "http://127.0.0.1",
+    "http://127.0.0.1:8000",
+    "http://127.0.0.1:8080",
 ]
 
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
@@ -57,6 +63,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'DaHub.apps.DaHubConfig',
     'Sledgepong.apps.SledgepongConfig',
+    'GodClicker.apps.GodClickerConfig',
 ]
 
 MIDDLEWARE = [

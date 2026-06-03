@@ -1,0 +1,109 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'GodClicker/css/game.css' %}?v=3">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Jersey+15&display=swap" rel="stylesheet">
+    <title>God Clicker</title>
+</head>
+<body>
+    {% csrf_token %}
+
+    <!-- ===== Animated Mount Olympus scene (pure SVG/CSS, no image assets) ===== -->
+    <div class="scene" aria-hidden="true">
+        <div class="sky"></div>
+        <div class="sun"></div>
+        <div id="stars" class="stars"></div>
+
+        <!-- Drifting clouds -->
+        <div class="clouds">
+            <svg class="cloud c1" viewBox="0 0 200 80"><ellipse cx="60" cy="50" rx="55" ry="26"/><ellipse cx="110" cy="42" rx="45" ry="30"/><ellipse cx="150" cy="52" rx="40" ry="22"/></svg>
+            <svg class="cloud c2" viewBox="0 0 200 80"><ellipse cx="60" cy="50" rx="55" ry="26"/><ellipse cx="110" cy="42" rx="45" ry="30"/><ellipse cx="150" cy="52" rx="40" ry="22"/></svg>
+            <svg class="cloud c3" viewBox="0 0 200 80"><ellipse cx="60" cy="50" rx="55" ry="26"/><ellipse cx="110" cy="42" rx="45" ry="30"/><ellipse cx="150" cy="52" rx="40" ry="22"/></svg>
+        </div>
+
+        <!-- Parallax mountain layers -->
+        <svg class="mountains far" viewBox="0 0 1440 400" preserveAspectRatio="none">
+            <polygon points="0,400 0,230 220,120 430,250 650,90 900,260 1140,130 1440,250 1440,400"/>
+        </svg>
+        <svg class="mountains mid" viewBox="0 0 1440 400" preserveAspectRatio="none">
+            <polygon points="0,400 0,300 260,180 520,320 760,150 1020,330 1280,200 1440,330 1440,400"/>
+        </svg>
+        <svg class="mountains near" viewBox="0 0 1440 400" preserveAspectRatio="none">
+            <polygon points="0,400 0,360 300,250 560,380 820,230 1120,390 1440,280 1440,400"/>
+            <!-- snow caps -->
+            <polygon class="snow" points="820,230 870,275 770,275"/>
+            <polygon class="snow" points="560,380 540,360 580,360"/>
+        </svg>
+
+        <!-- Temple columns silhouette in the foreground -->
+        <div class="colonnade">
+            <span class="column"></span><span class="column"></span>
+            <span class="column"></span><span class="column"></span>
+            <span class="column"></span><span class="column"></span>
+        </div>
+
+        <!-- Lightning flash overlay (triggered by JS) -->
+        <div id="lightning" class="lightning"></div>
+    </div>
+
+    <a id="backButton" href="{% url 'GodClicker' %}">Menu</a>
+    <button id="muteBtn" class="mute-btn" title="Toggle sound">&#128266;</button>
+
+    <main class="game">
+        <!-- Left: the deity you click -->
+        <section class="altar">
+            <div class="counters">
+                <div id="faith" class="faith">0</div>
+                <div class="faith-label">Faith</div>
+                <div id="perSecond" class="per-second">0 / sec</div>
+                <div id="totalFaith" class="total-faith">0 prayed in total</div>
+            </div>
+            <button id="deity" class="deity" aria-label="Pray to the god">
+                <span class="deity-glyph">&#9889;</span>
+            </button>
+            <div id="clickInfo" class="click-info">+1 per prayer</div>
+            <div class="controls">
+                <button id="saveBtn" class="ctrl-btn">Save</button>
+                <button id="resetBtn" class="ctrl-btn danger">Reset</button>
+            </div>
+            <div id="saveStatus" class="save-status"></div>
+        </section>
+
+        <!-- Middle: upgrades (one-time blessings), Cookie-Clicker tile grid -->
+        <section class="panel">
+            <h2 class="panel-title">Blessings</h2>
+            <div id="upgrades" class="upgrade-grid"></div>
+            <p id="noUpgrades" class="empty-hint">Gather more followers to unlock blessings.</p>
+        </section>
+
+        <!-- Right: generators (auto-producers) -->
+        <section class="panel">
+            <h2 class="panel-title">Followers</h2>
+            <div id="generators" class="list"></div>
+        </section>
+    </main>
+
+    <!-- Shared hover tooltip for upgrade tiles -->
+    <div id="upTooltip" class="up-tooltip" hidden></div>
+
+    <!-- Floating buff indicator -->
+    <div id="buffBar" class="buff-bar"></div>
+
+    <script id="generators-data" type="application/json">{{ generators_json|safe }}</script>
+    <script id="upgrades-data" type="application/json">{{ upgrades_json|safe }}</script>
+    <script id="state-data" type="application/json">{{ state_json|safe }}</script>
+    <script>
+        window.GODCLICKER = {
+            saveUrl: "{% url 'godclicker-save' %}",
+            resetUrl: "{% url 'godclicker-reset' %}",
+            isAuthenticated: {% if user.is_authenticated %}true{% else %}false{% endif %},
+        };
+    </script>
+    <script src="{% static 'GodClicker/js/game.js' %}?v=3"></script>
+</body>
+</html>

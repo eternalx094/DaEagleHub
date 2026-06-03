@@ -2,7 +2,8 @@
   "permissions": {
     "allow": [
       "Bash(git -C \"c:/Users/etern/PycharmProjects/DaEagleHub\" log --oneline -10)",
-      "Bash(git -C \"c:/Users/etern/PycharmProjects/DaEagleHub\" status --short)"
+      "Bash(git -C \"c:/Users/etern/PycharmProjects/DaEagleHub\" status --short)",
+      "Bash(grep -E \"docker-compose|\\\\.sh$\")"
     ]
   }
 }
