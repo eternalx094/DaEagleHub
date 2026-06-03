@@ -1,7 +1,7 @@
 services:
   nginx:
     ports:
-      - "80:80"
+      - "8080:80"
     volumes:
       - type: bind
         source: ./nginx/dev.conf
