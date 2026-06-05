@@ -227,6 +227,7 @@ class Toolbar {
         const actions = [
             { label: this.editor.getSongLabel(), handler: () => this.editor.promptLoadSong() },
             { label: this.editor.getMusicLabel(), handler: () => this.editor.toggleMusic() },
+            { label: "Rewind Music", handler: () => this.editor.rewindMusic() },
             { label: "Test Level", handler: () => this.editor.testLevel() },
             { label: "Save Level", handler: () => this.editor.saveLevel() },
             { label: `Visibility: ${this.editor.getVisibilityLabel()}`, handler: () => this.editor.toggleVisibility() },
@@ -970,6 +971,33 @@ class Editor {
         }
     }
 
+    rewindMusic() {
+        if (!this.audioElement) {
+            this.showMessage("Load a song first");
+            return;
+        }
+        this.seekMusic(0);
+        this.showMessage("Rewound to start");
+    }
+
+    seekMusic(timeSeconds) {
+        if (!this.audioElement) return;
+        const dur = this.audioDurationSeconds || this.audioElement.duration || 0;
+        const max = dur > 0 ? dur - 0.05 : timeSeconds;
+        const safe = Math.max(0, Math.min(max, timeSeconds));
+        try { this.audioElement.currentTime = safe; } catch (e) {
+            console.warn("[music] seek failed:", e);
+        }
+        const playheadX = safe * this.pxPerSec();
+        const centerOffset = (this.canvas.width - this.toolbar.width) / 2;
+        this.viewX = Math.max(0, playheadX - centerOffset);
+    }
+
+    #isPointInWaveformBand(canvasY) {
+        if (!this.audioElement) return false;
+        return canvasY >= 8 && canvasY <= 8 + 54;
+    }
+
     #createAudioFileInput() {
         const input = document.createElement("input");
         input.type = "file";
@@ -1161,6 +1189,10 @@ class Editor {
 
             if (e.button !== 0) return;
             const world = this.#toWorld(x, y);
+            if (this.#isPointInWaveformBand(y)) {
+                this.seekMusic(this.xToTime(world.x));
+                return;
+            }
             this.#placeOrSelectEntity(world.x, world.y, e.shiftKey);
         });
 

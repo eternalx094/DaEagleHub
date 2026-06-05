@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="{% static 'GodClicker/css/scene.css' %}?v=1">
-    <link rel="stylesheet" href="{% static 'GodClicker/css/game.css' %}?v=5">
+    <link rel="stylesheet" href="{% static 'GodClicker/css/game.css' %}?v=8">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Jersey+15&display=swap" rel="stylesheet">
@@ -65,9 +65,12 @@
                 <div id="totalFaith" class="total-faith">0 prayed in total</div>
                 <div id="rebirthInfo" class="rebirth-info"></div>
             </div>
-            <button id="deity" class="deity" aria-label="Pray to the god">
-                <span class="deity-glyph">&#9889;</span>
-            </button>
+            <div class="deity-stage">
+                <div id="orbits" class="orbits" aria-hidden="true"></div>
+                <button id="deity" class="deity" aria-label="Pray to the god">
+                    <span class="deity-glyph">&#9889;</span>
+                </button>
+            </div>
             <div id="clickInfo" class="click-info">+1 per prayer</div>
             <div class="controls">
                 <button id="saveBtn" class="ctrl-btn">Save</button>
@@ -110,6 +113,6 @@
         };
     </script>
     <script src="{% static 'GodClicker/js/scene.js' %}?v=1"></script>
-    <script src="{% static 'GodClicker/js/game.js' %}?v=6"></script>
+    <script src="{% static 'GodClicker/js/game.js' %}?v=8"></script>
 </body>
 </html>

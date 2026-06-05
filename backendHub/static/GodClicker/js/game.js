@@ -104,6 +104,7 @@
     rebirthInfo: document.getElementById("rebirthInfo"),
     rebirthBtn: document.getElementById("rebirthBtn"),
     deity: document.getElementById("deity"),
+    orbits: document.getElementById("orbits"),
     clickInfo: document.getElementById("clickInfo"),
     generators: document.getElementById("generators"),
     upgrades: document.getElementById("upgrades"),
@@ -299,6 +300,35 @@
     el.noUpgrades.style.display = anyUpgrade ? "none" : "block";
 
     updateRebirthUI();
+    renderOrbits();
+  }
+
+  // Followers orbiting the deity — rebuilt only when owned counts change.
+  let orbitSig = "";
+  function renderOrbits() {
+    const CAP = 6; // max icons shown per follower type
+    const sig = GENERATORS.map((g) => Math.min(owned(g.id), CAP)).join(",");
+    if (sig === orbitSig) return;
+    orbitSig = sig;
+    const frag = document.createDocumentFragment();
+    GENERATORS.forEach((gen, i) => {
+      const n = Math.min(owned(gen.id), CAP);
+      if (n === 0) return;
+      const radius = 120 + (i % 4) * 10;          // a few interleaved rings
+      const dur = 9 + (i % 4) * 3;                 // varied speeds
+      const dir = i % 2 ? "reverse" : "normal";    // alternating directions
+      for (let k = 0; k < n; k++) {
+        const icon = document.createElement("div");
+        icon.className = "orbit-icon";
+        icon.textContent = gen.glyph || "•";
+        icon.style.setProperty("--r", radius + "px");
+        icon.style.setProperty("--a0", Math.round((k / n) * 360) + "deg");
+        icon.style.setProperty("--dur", dur + "s");
+        icon.style.setProperty("--dir", dir);
+        frag.appendChild(icon);
+      }
+    });
+    el.orbits.replaceChildren(frag);
   }
 
   function updateRebirthUI() {
@@ -443,7 +473,6 @@
   // ==========================================================================
   // Persistence
   // ==========================================================================
-  const LOCAL_KEY = "godclicker_save";
   const getCsrf = () => {
     const i = document.querySelector('input[name="csrfmiddlewaretoken"]');
     return i ? i.value : "";
@@ -452,19 +481,20 @@
     faith: state.faith, total_faith: state.total_faith, click_power: state.click_power,
     generators: state.generators, upgrades: state.upgrades, rebirths: state.rebirths,
   });
-  function saveLocal() {
-    try { localStorage.setItem(LOCAL_KEY, JSON.stringify(snapshot())); } catch (_) {}
-  }
   function flashStatus(msg, isError) {
     el.saveStatus.textContent = msg;
     el.saveStatus.style.color = isError ? "var(--red)" : "var(--green)";
     setTimeout(() => { el.saveStatus.textContent = ""; }, 2500);
   }
+  // Progress is persisted only to the database — there is no local save.
   function saveServer(silent) {
-    saveLocal();
-    if (!cfg.isAuthenticated || !cfg.saveUrl) { if (!silent) flashStatus("Saved locally"); return; }
+    if (!cfg.isAuthenticated || !cfg.saveUrl) {
+      if (!silent) flashStatus("Log in to save your progress", true);
+      return;
+    }
     fetch(cfg.saveUrl, {
       method: "POST",
+      keepalive: true, // allow the save to finish even as the page unloads
       headers: { "Content-Type": "application/json", "X-CSRFToken": getCsrf() },
       body: JSON.stringify(snapshot()),
     })
@@ -475,7 +505,7 @@
     if (!window.confirm("Abandon EVERYTHING — Faith, followers, blessings and rebirths — and start completely over?")) return;
     state.faith = 0; state.total_faith = 0; state.click_power = 1;
     state.generators = {}; state.upgrades = []; state.rebirths = 0; buffs = [];
-    renderBuffs(); saveLocal();
+    renderBuffs();
     if (cfg.isAuthenticated && cfg.resetUrl) {
       fetch(cfg.resetUrl, { method: "POST", headers: { "X-CSRFToken": getCsrf() } });
     }
@@ -490,7 +520,6 @@
     banner("Rebirth " + state.rebirths + "!  ×" + fmt(rebirthMultiplier()) + " Faith");
     burst(window.innerWidth / 2, window.innerHeight / 2, 30, "#d9b3ff");
     shake();
-    saveLocal();
     refresh();
   }
 
@@ -536,14 +565,12 @@
   }, TICK_MS);
 
   setInterval(() => saveServer(true), 20000);
-  window.addEventListener("beforeunload", saveLocal);
+  // Persist to the database when the page is hidden/closed (keepalive finishes it).
+  window.addEventListener("pagehide", () => saveServer(true));
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "hidden") saveServer(true);
+  });
 
-  if (!cfg.isAuthenticated && state.total_faith === 0) {
-    try {
-      const local = JSON.parse(localStorage.getItem(LOCAL_KEY) || "null");
-      if (local) Object.assign(state, local);
-    } catch (_) {}
-  }
   state.click_power = computeClickPower();
   updateMuteBtn();
   buildList();

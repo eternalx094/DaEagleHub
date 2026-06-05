@@ -183,6 +183,43 @@ body {
   to { transform: scale(1.6); opacity: 0; }
 }
 
+/* Owned followers orbit the deity (Cookie-Clicker style) */
+.deity-stage {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 320px;
+  height: 320px;
+}
+.orbits {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 2;
+}
+.orbit-icon {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 28px;
+  height: 28px;
+  margin: -14px 0 0 -14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 21px;
+  opacity: 0.92;
+  filter: drop-shadow(0 0 5px rgba(245, 217, 139, 0.65));
+  animation: orbit var(--dur, 12s) linear infinite;
+  animation-direction: var(--dir, normal);
+  will-change: transform;
+}
+@keyframes orbit {
+  from { transform: rotate(var(--a0)) translateX(var(--r)) rotate(calc(-1 * var(--a0))); }
+  to   { transform: rotate(calc(var(--a0) + 360deg)) translateX(var(--r)) rotate(calc(-1 * (var(--a0) + 360deg))); }
+}
+
 .click-info { font-size: 18px; opacity: 0.85; }
 
 .controls { display: flex; gap: 10px; margin-top: 6px; }
