@@ -6,6 +6,6 @@ COPY requirements.txt requirements.txt
 RUN  pip install --upgrade pip
 RUN pip install -r requirements.txt
 COPY . .
-RUN sed -i 's/\r$//' entrypoint.sh && chmod +x entrypoint.sh
 ENV PYTHONUNBUFFERED=1
 ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
