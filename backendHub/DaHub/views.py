@@ -1,9 +1,15 @@
+from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from .models import Application
 from django.contrib.auth import authenticate, login
 from .forms import CustomAuthForm
 from django.contrib import messages
 from .forms import CustomUserCreationForm
+
+
+def ads_txt_view(request):
+    body = "google.com, pub-7893421641535094, DIRECT, f08c47fec0942fa0\n"
+    return HttpResponse(body, content_type="text/plain")
 ######################################################################################################
 def hub_view(request):
     apps = Application.objects.all()
