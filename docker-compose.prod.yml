@@ -1,4 +1,8 @@
 services:
+  backend:
+    environment:
+      DJANGO_DEBUG: "false"
+
   nginx:
     ports:
       - "80:80"

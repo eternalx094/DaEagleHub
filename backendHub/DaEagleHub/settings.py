@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
+import os
 from pathlib import Path
 
 from django.conf.global_settings import STATIC_ROOT, STATICFILES_DIRS, AUTH_USER_MODEL
@@ -22,10 +23,13 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-0u6e$kbkf)blr8wy+uqt3m5+t3=_us87fy!x7g_l5buju#r*p='
+SECRET_KEY = os.environ.get(
+    "DJANGO_SECRET_KEY",
+    "django-insecure-0u6e$kbkf)blr8wy+uqt3m5+t3=_us87fy!x7g_l5buju#r*p=",
+)
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ.get("DJANGO_DEBUG", "true").lower() in ("1", "true", "yes", "on")
 
 ALLOWED_HOSTS = [
     "daeaglehub.com",
